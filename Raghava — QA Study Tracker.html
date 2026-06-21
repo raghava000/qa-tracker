@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<!-- saved from url=(0083)file:///Users/raghava/Claude/Projects/Playwright%20with%20Python/study_tracker.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raghava — QA Study Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0b08;
+  --card:#161210;--card2:#120f0d;--card3:#1c1814;
+  --border:#2a2218;--border-a:rgba(245,158,11,.3);
+  --gold:#f59e0b;--gold-light:#fcd34d;--gold-dim:#2a1f00;
+  --green:#4ade80;--rose:#f87171;--sky:#38bdf8;
+  --text:#fef8f0;--dim:#b8a99a;--muted:#5c4f42;
+  --font:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI Variable','Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+/* warm ambient glow */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 0% 0%,rgba(245,158,11,.08) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 100% 100%,rgba(251,191,36,.05) 0%,transparent 60%);}
+
+/* top accent line — gold */
+body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;z-index:999;pointer-events:none;
+  background:linear-gradient(90deg,transparent 0%,#f59e0b 35%,#fcd34d 65%,transparent 100%);opacity:.8}
+
+/* ── HEADER ── */
+.hdr{position:relative;z-index:2;padding:26px 3% 18px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(160deg,rgba(245,158,11,.07) 0%,transparent 60%)}
+.hdr-top{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.hdr-icon{font-size:30px;filter:drop-shadow(0 0 14px rgba(245,158,11,.6))}
+.hdr-title{font-size:23px;font-weight:800;letter-spacing:-.4px;
+  background:linear-gradient(120deg,#fcd34d 0%,#f59e0b 50%,#fbbf24 100%);
+  background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:shimmer 7s linear infinite}
+@keyframes shimmer{to{background-position:200% center}}
+.hdr-sub{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.3px}
+.xp-badge{margin-left:auto;flex-shrink:0;
+  background:var(--gold-dim);border:1px solid rgba(245,158,11,.35);
+  border-radius:12px;padding:8px 16px;text-align:right;
+  box-shadow:0 0 18px rgba(245,158,11,.1)}
+.xp-val{font-size:19px;font-weight:800;color:var(--gold-light);letter-spacing:-.3px}
+.xp-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.level-bar-wrap{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 16px}
+.level-info{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.level-name{font-size:12px;font-weight:700;color:var(--gold)}
+.level-next{font-size:11px;color:var(--muted);margin-left:auto}
+.level-bar{height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
+.level-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#d97706,#fcd34d);transition:width .6s cubic-bezier(.4,0,.2,1);box-shadow:0 0 10px rgba(245,158,11,.5)}
+
+/* ── QUOTE ── */
+.quote-bar{position:relative;z-index:1;margin:14px 3%;padding:13px 18px;
+  background:var(--card2);border:1px solid var(--border);
+  border-left:3px solid var(--gold);border-radius:10px;cursor:pointer;transition:background .2s}
+.quote-bar:hover{background:var(--card3)}
+.quote-text{font-size:13px;color:var(--dim);font-style:italic;line-height:1.7}
+.quote-author{font-size:11px;color:var(--muted);margin-top:6px}
+.quote-hint{font-size:10px;color:var(--muted);float:right;margin-top:-14px;opacity:.4}
+
+/* ── STATS ── */
+.stats{position:relative;z-index:1;display:flex;gap:10px;padding:0 3% 16px;flex-wrap:wrap}
+.stat{flex:1;min-width:110px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:14px 16px;transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,.5)}
+.stat:hover{border-color:rgba(245,158,11,.3);transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.stat-n{font-size:22px;font-weight:800;color:var(--text);line-height:1;letter-spacing:-.5px}
+.stat-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;margin-top:6px;font-weight:600}
+.stat-b{font-size:11px;color:var(--gold-light);margin-top:3px;font-weight:500}
+.streak-fire{font-size:19px}
+
+/* ── TODAY BANNER ── */
+.today-banner{position:relative;z-index:1;margin:0 3% 16px;padding:11px 16px;
+  background:linear-gradient(100deg,#1f1400,#1a1200);
+  border:1px solid rgba(245,158,11,.25);border-radius:10px;display:flex;align-items:center;gap:12px}
+.today-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+.today-text{font-size:13px;color:var(--dim);font-weight:500}
+.today-text strong{color:var(--gold-light);font-weight:700}
+
+/* ── SEARCH ── */
+.search-wrap{position:relative;z-index:10;margin:0 3% 12px;display:flex;align-items:center;gap:10px}
+.search-icon-abs{position:absolute;left:13px;color:var(--muted);font-size:14px;pointer-events:none}
+.search-input{flex:1;background:var(--card);border:1px solid var(--border);
+  border-radius:9px;padding:10px 14px 10px 38px;color:var(--text);font-size:13px;
+  font-family:inherit;outline:none;transition:all .2s}
+.search-input:focus{border-color:rgba(245,158,11,.4);box-shadow:0 0 0 3px rgba(245,158,11,.08)}
+.search-input::placeholder{color:var(--muted)}
+.search-count{font-size:11px;color:var(--dim);white-space:nowrap;flex-shrink:0}
+.search-clear{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px}
+.search-clear:hover{color:var(--text)}
+.task-item.smatch{background:rgba(245,158,11,.07);border-radius:7px;outline:1px solid rgba(245,158,11,.2)}
+.task-item.shide{display:none}
+.day-card.shide{display:none}
+
+/* ── MONTHS ── */
+.main{position:relative;z-index:1;padding:0 3% 80px}
+.month-wrap{margin-bottom:14px;background:var(--card);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.month-wrap:hover{border-color:rgba(245,158,11,.2)}
+.month-hdr{display:flex;align-items:center;gap:14px;padding:16px 22px;cursor:pointer;user-select:none;
+  background:linear-gradient(100deg,rgba(245,158,11,.08) 0%,transparent 55%);transition:background .2s}
+.month-hdr:hover{background:linear-gradient(100deg,rgba(245,158,11,.13) 0%,transparent 55%)}
+.m-check{width:30px;height:30px;border-radius:50%;border:2px solid var(--muted);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;
+  flex-shrink:0;transition:all .3s}
+.m-check.done{background:linear-gradient(135deg,#d97706,#fcd34d);border-color:transparent;box-shadow:0 0 16px rgba(245,158,11,.5)}
+.m-title{font-size:15px;font-weight:800;flex:1;letter-spacing:-.2px}
+.m-prog-wrap{min-width:155px}
+.prog-bar{height:4px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#d97706,#fcd34d);transition:width .6s;box-shadow:0 0 8px rgba(245,158,11,.4)}
+.prog-pct{font-size:10px;color:var(--muted);text-align:right;margin-top:4px}
+.chevron{font-size:10px;color:var(--muted);transition:transform .25s;margin-left:8px}
+.chevron.open{transform:rotate(180deg)}
+
+/* ── WEEKS ── */
+.week-wrap{border-top:1px solid var(--border)}
+.week-hdr{display:flex;align-items:center;gap:12px;padding:10px 22px;cursor:pointer;user-select:none;transition:background .15s}
+.week-hdr:hover{background:rgba(245,158,11,.04)}
+.w-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--muted);
+  display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;
+  flex-shrink:0;transition:all .25s}
+.w-check.done{background:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(74,222,128,.35)}
+.w-info{flex:1}
+.w-title{font-size:13px;font-weight:700;color:var(--text)}
+.w-theme{font-size:11px;color:var(--muted);margin-top:2px}
+.w-days-count{font-size:11px;color:var(--dim);margin-right:8px}
+.w-chevron{font-size:10px;color:var(--muted);transition:transform .2s}
+.w-chevron.open{transform:rotate(180deg)}
+
+/* ── WEEK QUOTE ── */
+.week-quote{margin:6px 22px;padding:9px 14px;
+  background:rgba(245,158,11,.05);border-left:2px solid rgba(245,158,11,.4);
+  border-radius:0 7px 7px 0;font-size:11px;color:#a16207;font-style:italic;line-height:1.6}
+
+/* ── WATCH RESOURCES ── */
+.watch-bar{margin:4px 22px 10px;display:flex;flex-wrap:wrap;gap:6px;padding:9px 12px;
+  background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.12);
+  border-radius:9px;align-items:flex-start}
+.watch-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-right:4px;flex-shrink:0;padding-top:3px}
+.watch-chip{font-size:10px;font-weight:700;padding:4px 10px;border-radius:99px;cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;gap:4px;transition:all .15s;line-height:1.4}
+.watch-chip:hover{opacity:.8;transform:translateY(-1px)}
+.chip-e{background:#1f1000;color:#fcd34d;border:1px solid #3a2000}
+.chip-u{background:#120f00;color:#fde68a;border:1px solid #2a1f00}
+.chip-p{background:#0d1200;color:#d9f99d;border:1px solid #1a2600}
+.chip-icon{font-size:10px}
+.plat{font-size:8px;font-weight:700;padding:1px 5px;border-radius:99px;vertical-align:middle;margin-left:4px;text-transform:uppercase;letter-spacing:.3px}
+.plat-e{background:#1f1000;color:#fcd34d}
+.plat-u{background:#120f00;color:#fde68a}
+.plat-p{background:#0d1200;color:#d9f99d}
+
+/* ── DAYS ── */
+.days-wrap{padding:4px 12px 12px}
+.day-card{margin:5px 0;background:var(--card2);border:1px solid var(--border);
+  border-radius:9px;overflow:hidden;transition:border-color .18s}
+.day-card:hover{border-color:rgba(245,158,11,.22)}
+.day-card.day-done{border-color:rgba(74,222,128,.15);background:rgba(74,222,128,.02)}
+.day-card.day-today{
+  border-color:rgba(245,158,11,.5);
+  background:linear-gradient(160deg,rgba(245,158,11,.08) 0%,var(--card2) 45%);
+  box-shadow:0 0 0 1px rgba(245,158,11,.1),0 4px 18px rgba(245,158,11,.1)}
+.day-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none}
+.day-hdr:hover{background:rgba(255,255,255,.012)}
+.day-num-badge{background:var(--gold-dim);border:1px solid rgba(245,158,11,.22);color:var(--gold-light);
+  font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0;min-width:50px;text-align:center}
+.day-done-badge{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.22);color:var(--green)}
+.day-chk{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--muted);
+  display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;cursor:pointer;transition:all .18s}
+.day-chk:hover{border-color:var(--green);background:rgba(74,222,128,.1)}
+.day-chk.done{background:var(--green);border-color:var(--green);box-shadow:0 0 8px rgba(74,222,128,.4);color:#052e16}
+.day-label{font-size:12.5px;color:var(--dim);flex:1;line-height:1.3;font-weight:500}
+.day-done .day-label{color:var(--text)}
+.day-task-count{font-size:10px;color:var(--muted);flex-shrink:0}
+.day-chv{font-size:10px;color:var(--muted);margin-left:4px;transition:transform .2s;flex-shrink:0}
+.day-chv.open{transform:rotate(180deg)}
+.day-body{display:none;padding:4px 14px 12px}
+.day-body.open{display:block}
+
+/* ── TASKS — unified tag, no rainbow ── */
+.task-item{display:flex;align-items:flex-start;gap:9px;padding:7px 4px;border-bottom:1px solid rgba(255,255,255,.035)}
+.task-item:last-child{border-bottom:none}
+.t-chk{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--muted);
+  flex-shrink:0;margin-top:3px;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;font-size:9px;transition:all .15s}
+.t-chk:hover{border-color:var(--green)}
+.t-chk.done{background:var(--green);border-color:var(--green);color:#052e16}
+.t-tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:5px;flex-shrink:0;
+  text-transform:uppercase;letter-spacing:.5px;min-width:48px;text-align:center;margin-top:2px;
+  background:#1f1a14;color:#8a7a68;border:1px solid #2e2518}
+.t-text{font-size:12.5px;color:var(--dim);line-height:1.6;flex:1}
+.t-text.done{color:var(--muted);text-decoration:line-through}
+.t-code{font-family:'Consolas','Menlo','Monaco',monospace;font-size:11px;
+  background:#0a0805;border:1px solid #2a2018;
+  border-radius:7px;padding:8px 12px;margin-top:6px;color:#c8b07a;display:block;line-height:1.7}
+
+/* ── MILESTONE ── */
+.milestone{text-align:center;padding:20px;margin:8px 0;
+  background:linear-gradient(135deg,#1f1200,#0d0900);
+  border:1px solid rgba(245,158,11,.2);border-radius:12px}
+.milestone-icon{font-size:28px;display:block;margin-bottom:8px}
+.milestone-text{font-size:14px;font-weight:700;color:var(--gold-light)}
+.milestone-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* ── RESET BTN ── */
+.reset-btn{position:fixed;bottom:20px;right:20px;
+  background:var(--card2);color:var(--muted);
+  border:1px solid var(--border);padding:8px 14px;border-radius:8px;font-size:11px;
+  cursor:pointer;z-index:99;transition:all .2s;font-family:inherit;font-weight:600}
+.reset-btn:hover{background:#2d0a0a;color:#fca5a5;border-color:#450a0a}
+
+@keyframes glow{0%,100%{box-shadow:0 0 12px rgba(245,158,11,.25)}50%{box-shadow:0 0 24px rgba(245,158,11,.5)}}
+.today-glow{animation:glow 2s infinite}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:58px;right:20px;background:var(--card3);border:1px solid var(--border);
+  border-radius:10px;padding:11px 16px;font-size:12px;color:var(--text);z-index:500;
+  box-shadow:0 8px 28px rgba(0,0,0,.5);animation:toastIn .3s ease;pointer-events:none;font-weight:500}
+.toast.hidden{display:none}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SESSION TIMER ── */
+.tmr-fab{position:fixed;top:16px;right:16px;z-index:299;
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:7px 12px;font-size:11px;font-weight:700;color:var(--gold);cursor:pointer;
+  box-shadow:0 2px 10px rgba(0,0,0,.5);font-family:inherit}
+.tmr-fab:hover{border-color:rgba(245,158,11,.3)}
+.tmr{position:fixed;top:16px;right:16px;z-index:300;
+  background:#0a0806;border:1px solid var(--border);border-radius:14px;
+  padding:14px 16px;min-width:155px;box-shadow:0 8px 32px rgba(0,0,0,.7)}
+.tmr-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.tmr-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;font-family:inherit}
+.tmr-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
+.tmr-display{font-size:28px;font-weight:800;font-family:monospace;color:var(--gold);text-align:center;letter-spacing:2px;line-height:1}
+.tmr-display.warn{color:#fb923c}.tmr-display.urg{color:var(--rose)}
+.tmr-blk{font-size:10px;color:var(--gold-light);text-align:center;margin-top:5px;line-height:1.3;min-height:14px;font-weight:500}
+.tmr-btns{display:flex;gap:6px;margin-top:10px}
+.tmr-btn{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--dim);
+  padding:6px 0;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;
+  transition:background .15s;font-family:inherit}
+.tmr-btn:hover{background:rgba(255,255,255,.1)}
+.tmr-btn.go{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.25);color:var(--green)}
+.tmr-btn.go:hover{background:rgba(74,222,128,.2)}
+
+/* ── STRUGGLE FLAG ── */
+.t-flag{background:none;border:none;cursor:pointer;font-size:13px;padding:1px 3px;
+  flex-shrink:0;margin-top:1px;opacity:.3;transition:opacity .15s,filter .15s}
+.t-flag:hover{opacity:1}
+.t-flag.on{opacity:1;filter:drop-shadow(0 0 5px rgba(248,113,113,.7))}
+.task-item.struggled{border-left:2px solid rgba(248,113,113,.35);padding-left:6px;margin-left:-6px}
+.struggle-banner{margin:0 0 10px;padding:9px 14px;
+  background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.18);
+  border-radius:10px;font-size:11px;color:#fca5a5;line-height:1.7}
+.struggle-banner strong{color:var(--rose);display:block;margin-bottom:5px}
+
+/* ── REFERENCE PANEL ── */
+.ref-fab{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:300;
+  background:var(--gold);color:#0d0b08;border:none;padding:13px 7px;
+  border-radius:0 9px 9px 0;cursor:pointer;font-size:11px;font-weight:800;
+  writing-mode:vertical-rl;letter-spacing:1px;
+  box-shadow:2px 0 18px rgba(245,158,11,.4);transition:background .2s;font-family:inherit}
+.ref-fab:hover{background:var(--gold-light)}
+.ref-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:398;display:none}
+.ref-ov.open{display:block}
+.ref-panel{position:fixed;left:-410px;top:0;bottom:0;width:410px;z-index:399;
+  background:#0a0806;border-right:1px solid var(--border);
+  overflow-y:auto;transition:left .3s ease;box-shadow:6px 0 32px rgba(0,0,0,.7)}
+.ref-panel.open{left:0}
+.ref-phdr{padding:16px 22px 12px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;background:#0a0806;z-index:1}
+.ref-ptitle{font-size:15px;font-weight:800}
+.ref-px{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+.ref-ptabs{display:flex;border-bottom:1px solid var(--border);position:sticky;top:52px;background:#0a0806;z-index:1}
+.ref-ptab{flex:1;padding:10px 6px;font-size:11px;font-weight:700;color:var(--muted);
+  cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;
+  text-transform:uppercase;letter-spacing:.5px;transition:all .15s;font-family:inherit}
+.ref-ptab.active{color:var(--gold-light);border-bottom-color:var(--gold)}
+.ref-pane{display:none;padding:16px 22px 28px}
+.ref-pane.active{display:block}
+.ref-sec{margin-bottom:20px}
+.ref-sec h4{font-size:10px;font-weight:800;color:var(--gold-light);text-transform:uppercase;
+  letter-spacing:.8px;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid rgba(245,158,11,.15)}
+.ref-row{font-size:11px;color:var(--dim);padding:3px 0;display:flex;gap:8px;line-height:1.6;align-items:flex-start}
+.ref-row code{font-family:Consolas,monospace;font-size:10px;background:rgba(0,0,0,.4);
+  border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:1px 6px;
+  color:#c8b07a;flex-shrink:0;white-space:nowrap}
+
+/* ── MOCK INTERVIEW ── */
+.iv-fab{position:fixed;bottom:20px;right:82px;z-index:200;
+  background:linear-gradient(135deg,#1f1200,#2a1800);
+  border:1px solid rgba(245,158,11,.35);color:var(--gold-light);
+  padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 18px rgba(245,158,11,.2);transition:all .2s;font-family:inherit}
+.iv-fab:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,158,11,.3)}
+.iv-ov{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:600;display:none;align-items:center;justify-content:center}
+.iv-ov.open{display:flex}
+.iv-modal{background:#100d09;border:1px solid rgba(245,158,11,.18);border-radius:18px;
+  width:min(660px,94vw);max-height:88vh;overflow-y:auto;padding:26px;
+  box-shadow:0 24px 64px rgba(0,0,0,.7)}
+.iv-modal h2{font-size:18px;font-weight:900;margin-bottom:2px;letter-spacing:-.3px}
+.iv-modal .sub{font-size:11px;color:var(--muted);margin-bottom:20px}
+.iv-dots{display:flex;gap:8px;justify-content:center;margin-bottom:18px}
+.iv-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.08);transition:all .3s}
+.iv-dot.done{background:var(--green)}.iv-dot.active{background:var(--gold);box-shadow:0 0 10px rgba(245,158,11,.6)}
+.iv-qnum{font-size:11px;color:var(--muted);margin-bottom:8px}
+.iv-tag{display:inline-block;font-size:10px;font-weight:700;padding:3px 12px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;background:#1f1a14;color:#8a7a68;border:1px solid #2e2518}
+.iv-q{font-size:14px;font-weight:700;line-height:1.6;color:var(--text);margin-bottom:14px;letter-spacing:-.1px}
+.iv-hint{font-size:12px;color:var(--dim);padding:12px 16px;
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.07);
+  border-radius:8px;display:none;line-height:1.7;font-family:Consolas,monospace;margin-bottom:14px}
+.iv-hint.show{display:block}
+.iv-show-hint{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;
+  border-radius:7px;font-size:11px;cursor:pointer;margin-bottom:14px;font-family:inherit;font-weight:600}
+.iv-show-hint:hover{border-color:rgba(245,158,11,.4);color:var(--gold-light)}
+.iv-timer{font-size:34px;font-weight:800;font-family:monospace;text-align:center;
+  padding:14px;border-radius:10px;background:rgba(0,0,0,.3);
+  margin-bottom:16px;transition:color .3s;color:var(--green);
+  border:1px solid rgba(255,255,255,.06)}
+.iv-timer.a{color:#fb923c}.iv-timer.r{color:var(--rose);animation:pulse .8s infinite}
+.iv-btns{display:flex;gap:10px;flex-wrap:wrap}
+.iv-btn{padding:10px 22px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .15s;font-family:inherit}
+.iv-btn.p{background:linear-gradient(135deg,#d97706,#fcd34d);color:#0d0b08;box-shadow:0 4px 14px rgba(245,158,11,.3)}
+.iv-btn.p:hover{opacity:.9;transform:translateY(-1px)}
+.iv-btn.s{background:rgba(255,255,255,.06);color:var(--dim);border:1px solid var(--border)}
+.iv-btn.s:hover{background:rgba(255,255,255,.1)}
+.iv-result{text-align:center;padding:20px 0}
+.iv-result h3{font-size:22px;font-weight:900;color:var(--gold-light);margin-bottom:10px;letter-spacing:-.3px}
+.iv-result p{font-size:13px;color:var(--dim);line-height:1.75}
+
+/* ── STREAK BONUS ── */
+.streak-x{font-size:9px;font-weight:700;
+  background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:var(--gold-light);
+  padding:2px 7px;border-radius:99px;margin-left:6px;vertical-align:middle;letter-spacing:.3px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-icon">⚡</div>
+    <div>
+      <div class="hdr-title">Raghava — QA Master Plan</div>
+      <div class="hdr-sub">56 days · Python · SQL · API · XPath · Docker · Ship it.</div>
+    </div>
+    <div class="xp-badge">
+      <div class="xp-val" id="xp-val">0 XP</div>
+      <div class="xp-label">earned</div>
+    </div>
+  </div>
+  <div class="level-bar-wrap">
+    <div class="level-info">
+      <span class="level-name" id="level-name">🌱 Beginner</span>
+      <span class="level-next" id="level-next">Next: Practitioner @ 100 XP</span>
+    </div>
+    <div class="level-bar"><div class="level-fill" id="level-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="quote-bar" onclick="nextQuote()">
+  <div class="quote-text" id="quote-text">The gap between your Verisk interview and your next offer isn't talent. It's 8 weeks of deliberate practice. You're already in it.</div>
+  <div class="quote-author" id="quote-author">— The math is simple</div>
+  <div class="quote-hint">click for next quote</div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-n" id="s-days">0/56</div>
+    <div class="stat-l">Days Done</div>
+    <div class="stat-b" id="s-remain">56 days remaining</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n" id="s-streak"><span class="streak-fire">🔥</span> 0</div>
+    <div class="stat-l">Day Streak</div>
+    <div class="stat-b" id="s-streak-msg">Start today!</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n" id="s-tasks">0%</div>
+    <div class="stat-l">Tasks Done</div>
+    <div class="stat-b" id="s-tasks-b">0 of 312 tasks</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n" id="s-eta">—</div>
+    <div class="stat-l">Target End</div>
+    <div class="stat-b" id="s-started">not started yet</div>
+  </div>
+</div>
+
+<div class="search-wrap">
+  <span class="search-icon-abs">🔍</span>
+  <input class="search-input" id="search-input" type="text" placeholder="Search tasks across all 56 days… (e.g. XPath, retry, GROUP BY, decorator)">
+  <span class="search-count" id="search-count"></span>
+  <button class="search-clear" id="search-clear" style="display:none" onclick="clearSearch()">✕</button>
+</div>
+
+<div class="today-banner" id="today-banner" style="display: flex;">
+  <div class="today-dot"></div>
+  <div class="today-text" id="today-text">Today's target: <strong>Day 1 — Variables, data types, first API call</strong>. Open it below and get started.</div>
+</div>
+
+<div class="main" id="app"><div class="month-wrap">
+    <div class="month-hdr" onclick="toggleM(1)">
+      <div class="m-check"><span>1</span></div>
+      <div class="m-title">Month 1 — Must-Have Foundations</div>
+      <div class="m-prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div><div class="prog-pct">0% · 0/170 tasks</div></div>
+      <div class="chevron">▼</div>
+    </div>
+    
+  </div><div class="month-wrap">
+    <div class="month-hdr" onclick="toggleM(2)">
+      <div class="m-check"><span>2</span></div>
+      <div class="m-title">Month 2 — Depth + Good-to-Haves</div>
+      <div class="m-prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div><div class="prog-pct">0% · 0/142 tasks</div></div>
+      <div class="chevron">▼</div>
+    </div>
+    
+  </div></div>
+<button class="reset-btn" onclick="if(confirm(&#39;Reset ALL progress? This cannot be undone.&#39;)){localStorage.clear();location.reload()}">↺ Reset</button>
+
+<!-- SESSION TIMER -->
+<button class="tmr-fab" id="tmr-fab" onclick="showTmr()">⏱ Timer</button>
+<div class="tmr" id="tmr-widget" style="display:none">
+  <div class="tmr-hdr"><span class="tmr-lbl">⏱ Session Timer</span><button class="tmr-x" onclick="hideTmr()">✕</button></div>
+  <div class="tmr-display" id="tmr-display">2:00:00</div>
+  <div class="tmr-blk" id="tmr-blk">Block 1 of 4 · Python</div>
+  <div class="tmr-btns">
+    <button class="tmr-btn go" id="tmr-go" onclick="toggleTmr()">▶ Start</button>
+    <button class="tmr-btn" onclick="resetTmr()">↺ Reset</button>
+  </div>
+</div>
+
+<!-- QUICK REFERENCE PANEL -->
+<button class="ref-fab" id="ref-fab" onclick="toggleRef()">📖 REF</button>
+<div class="ref-ov" id="ref-ov" onclick="toggleRef()"></div>
+<div class="ref-panel" id="ref-panel">
+  <div class="ref-phdr">
+    <span class="ref-ptitle">📖 Quick Reference</span>
+    <button class="ref-px" onclick="toggleRef()">✕</button>
+  </div>
+  <div class="ref-ptabs">
+    <button class="ref-ptab active" data-ref="xpath" onclick="switchRef(&#39;xpath&#39;)">XPath</button>
+    <button class="ref-ptab" data-ref="sql" onclick="switchRef(&#39;sql&#39;)">SQL</button>
+    <button class="ref-ptab" data-ref="python" onclick="switchRef(&#39;python&#39;)">Python</button>
+  </div>
+  <div class="ref-pane active" id="ref-xpath">
+    <div class="ref-sec"><h4>By Attribute</h4>
+      <div class="ref-row"><code>//tag[@attr="val"]</code>exact match</div>
+      <div class="ref-row"><code>//div[contains(@class,"name")]</code>class contains</div>
+      <div class="ref-row"><code>//a[starts-with(@href,"/api")]</code>attr starts-with</div>
+      <div class="ref-row"><code>//input[@type="text" and @id="u"]</code>AND condition</div>
+      <div class="ref-row"><code>//input[@type="text" or @name="q"]</code>OR condition</div>
+    </div>
+    <div class="ref-sec"><h4>By Text</h4>
+      <div class="ref-row"><code>//a[text()="Login"]</code>exact text</div>
+      <div class="ref-row"><code>//button[contains(text(),"Submit")]</code>text contains</div>
+      <div class="ref-row"><code>//span[normalize-space()="Sign in"]</code>whitespace-safe</div>
+    </div>
+    <div class="ref-sec"><h4>Position &amp; Index</h4>
+      <div class="ref-row"><code>(//tr)[3]</code>3rd match globally</div>
+      <div class="ref-row"><code>(//tr)[last()]</code>last match</div>
+      <div class="ref-row"><code>//tr[2]/td[1]</code>2nd row, 1st cell</div>
+    </div>
+    <div class="ref-sec"><h4>Traversal</h4>
+      <div class="ref-row"><code>//form[@id="login"]//input</code>nested anywhere</div>
+      <div class="ref-row"><code>//span/..</code>parent of span</div>
+      <div class="ref-row"><code>//label[text()="Name"]/following-sibling::input</code>sibling</div>
+      <div class="ref-row"><code>//div[@class="c"]//a[not(@disabled)]</code>not condition</div>
+    </div>
+    <div class="ref-sec"><h4>DevTools Console</h4>
+      <div class="ref-row"><code>$x("//div[@class='error']")</code>test in browser</div>
+      <div class="ref-row"><code>$("css.selector")</code>CSS equivalent</div>
+    </div>
+  </div>
+  <div class="ref-pane" id="ref-sql">
+    <div class="ref-sec"><h4>Joins</h4>
+      <div class="ref-row"><code>INNER JOIN</code>only matching rows both sides</div>
+      <div class="ref-row"><code>LEFT JOIN</code>all left rows + NULLs for no match</div>
+      <div class="ref-row"><code>RIGHT JOIN</code>all right rows + NULLs for no match</div>
+    </div>
+    <div class="ref-sec"><h4>Aggregation</h4>
+      <div class="ref-row"><code>GROUP BY col HAVING COUNT(*) &gt; 3</code>filter groups</div>
+      <div class="ref-row"><code>AVG(salary) OVER (PARTITION BY dept)</code>window fn</div>
+      <div class="ref-row"><code>COUNT(*) / SUM / AVG / MAX / MIN</code>aggregate fns</div>
+    </div>
+    <div class="ref-sec"><h4>Subqueries</h4>
+      <div class="ref-row"><code>WHERE id IN (SELECT id FROM ...)</code>subquery filter</div>
+      <div class="ref-row"><code>DELETE FROM t WHERE id IN (SELECT...)</code>delete with sub</div>
+      <div class="ref-row"><code>INSERT INTO b SELECT * FROM a WHERE...</code>copy rows</div>
+    </div>
+    <div class="ref-sec"><h4>Transactions</h4>
+      <div class="ref-row"><code>BEGIN; UPDATE...; ROLLBACK;</code>undo everything</div>
+      <div class="ref-row"><code>BEGIN; UPDATE...; SAVEPOINT sp1; UPDATE...; ROLLBACK TO sp1; COMMIT;</code>partial undo</div>
+    </div>
+    <div class="ref-sec"><h4>Schema</h4>
+      <div class="ref-row"><code>CREATE INDEX idx ON t(col)</code>speed up WHERE</div>
+      <div class="ref-row"><code>CREATE VIEW v AS SELECT...</code>reusable query</div>
+      <div class="ref-row"><code>EXPLAIN SELECT...</code>see if index is used</div>
+    </div>
+  </div>
+  <div class="ref-pane" id="ref-python">
+    <div class="ref-sec"><h4>Comprehensions</h4>
+      <div class="ref-row"><code>[x*2 for x in lst if x&gt;0]</code>list comp</div>
+      <div class="ref-row"><code>{k:v for k,v in pairs}</code>dict comp</div>
+      <div class="ref-row"><code>[x for row in matrix for x in row]</code>flatten 2D</div>
+    </div>
+    <div class="ref-sec"><h4>Functional</h4>
+      <div class="ref-row"><code>sorted(lst, key=lambda x: x['age'])</code>sort by key</div>
+      <div class="ref-row"><code>list(map(lambda x: x**2, lst))</code>map</div>
+      <div class="ref-row"><code>list(filter(lambda x: x&gt;0, lst))</code>filter</div>
+    </div>
+    <div class="ref-sec"><h4>Decorators &amp; Context</h4>
+      <div class="ref-row"><code>def retry(n=3): def dec(f): def w(*a,**k): [try:return f(*a,**k) except:pass for _ in range(n)]; return w; return dec</code>retry decorator</div>
+      <div class="ref-row"><code>@contextmanager def timer(): t=time.time(); yield; print(time.time()-t)</code>context mgr</div>
+    </div>
+    <div class="ref-sec"><h4>OOP</h4>
+      <div class="ref-row"><code>class Foo: def __init__(self, x): self.x=x</code>class</div>
+      <div class="ref-row"><code>class Bar(Foo): def __init__(self): super().__init__(1)</code>inherit</div>
+      <div class="ref-row"><code>@classmethod / @staticmethod</code>class-level methods</div>
+    </div>
+    <div class="ref-sec"><h4>pytest / requests</h4>
+      <div class="ref-row"><code>@pytest.fixture(scope='session')</code>run once per suite</div>
+      <div class="ref-row"><code>@pytest.mark.parametrize('id',[1,2,3])</code>parametrize</div>
+      <div class="ref-row"><code>r=requests.get(url,headers=h); r.status_code; r.json()</code>requests</div>
+      <div class="ref-row"><code>s=requests.Session(); s.headers['Authorization']='Bearer X'</code>session auth</div>
+    </div>
+  </div>
+</div>
+
+<!-- MOCK INTERVIEW -->
+<button class="iv-fab" onclick="openIV()">🎯 Mock Interview</button>
+<div class="iv-ov" id="iv-ov">
+  <div class="iv-modal" id="iv-modal"></div>
+</div>
+
+<script>
+const QUOTES = [
+  // personal — verisk & the journey
+  {t:"Verisk said no once. That's data, not your destiny. Learn, return, and make them wonder how they missed you.",a:"— Your future self, Day 56"},
+  {t:"The Verisk interviewer gave you a gift: exact coordinates of what to build. Most candidates get nothing. You got a map.",a:"— Reframe everything"},
+  {t:"They asked about XPath and SQL. You didn't know them cold. Now you're spending 56 days making sure you never blank on them again. That's class.",a:"— Growth mindset in action"},
+  {t:"You walked into that F2F interview. You made it to the final round at Verisk. That's not a failure — that's 90% of the way there.",a:"— The honest ledger"},
+  {t:"The gap between your Verisk interview and your next offer isn't talent. It's 8 weeks of deliberate practice. You're already in it.",a:"— The math is simple"},
+  {t:"11 years of QA experience. You don't need to start over. You need to fill exactly 3 gaps: XPath, SQL, Python scripting. Just 3.",a:"— The real problem statement"},
+  // retry logic as metaphor
+  {t:"The retry loop isn't just code. It's your mindset. Keep trying until it returns true.",a:"— Week 3 insight"},
+  {t:"call_with_retry(career, retries=unlimited). You haven't hit your return True yet. Keep looping.",a:"— The career algorithm"},
+  {t:"If response.status_code != 200, don't quit. Retry with more knowledge. That's literally what you're doing right now.",a:"— API testing as life advice"},
+  // consistency
+  {t:"56 days. 112 hours. That's all that stands between you and your next offer letter.",a:"— The arithmetic of ambition"},
+  {t:"Consistency beats intensity. 2 hours every single day beats one 14-hour weekend session every time.",a:"— Proven by neuroscience"},
+  {t:"You studied 1 hour today. Your competition took the day off. That's the gap closing.",a:"— Every single day"},
+  {t:"Day 1 feels hard. Day 10 feels normal. Day 30 feels like breathing. Stay in it.",a:"— The adaptation curve"},
+  // the specific gaps
+  {t:"XPath wasn't your weakness. It was just untrained. There's a big difference. One is permanent. The other is a Tuesday.",a:"— Interview feedback reframed"},
+  {t:"Every SQL JOIN you master is one less question you'll stumble on in an interview room.",a:"— Day 1 SQL principle"},
+  {t:"SQL testing was Verisk's second feedback point. Not first. That means your automation was strong enough to get you there.",a:"— Read the signal correctly"},
+  {t:"Python scripting fundamentals. Loops. Functions. OOP. Not hard topics. Just undrilled ones. You're drilling now.",a:"— The missing piece"},
+  // product company mindset
+  {t:"Product companies don't hire QA engineers who know how to click buttons. They hire engineers who can write code that clicks buttons.",a:"— The shift"},
+  {t:"SQL, Python, APIs — three languages that open every door at every product company in this industry.",a:"— The stack that matters"},
+  {t:"A QA engineer who can write SQL and verify database state after API calls is worth 3× a QA who only tests the UI.",a:"— Market reality"},
+  {t:"The interviewer who asked about retry logic wasn't being tricky. They were checking: does this person think like an engineer or like a tester?",a:"— The real question"},
+  // XP and progress
+  {t:"Your XPath is sharp. Your SQL is solid. Your Python has muscle memory. The next job is already waiting.",a:"— Month 2, Day 56 vision"},
+  {t:"Small daily improvements look boring from the inside and stunning from the outside.",a:"— James Clear adapted"},
+  {t:"Every task you tick today is 10 XP closer to the engineer you're becoming.",a:"— The system working"},
+  {t:"You don't rise to the level of your goals. You fall to the level of your systems. This tracker is your system.",a:"— James Clear"},
+  // edureka/udemy specific
+  {t:"Edureka's 40-minute video on OOP today. Udemy's API testing section tonight. Practice script before bed. That's a complete day.",a:"— The daily formula"},
+  {t:"Watch the video to understand the concept. Practice the code to own it. Repeat until your fingers know it without thinking.",a:"— The learning loop"},
+  {t:"The Edureka video teaches you what Python OOP is. The practice task makes you a Python OOP developer. Both matter.",a:"— Watch + practice"},
+  // motivation classics with a twist
+  {t:"Don't count the days. Make the days count.",a:"— Muhammad Ali (every QA engineer's mantra too)"},
+  {t:"Practice like you've never won. Perform like you've never lost.",a:"— Sports psychology, applied to interviews"},
+  {t:"A test not written is a bug waiting to be shipped. A concept not practiced is a gap waiting to be exposed.",a:"— QA wisdom extended"},
+  {t:"Writing one test today is worth more than planning ten tests tomorrow. Open the editor.",a:"— Ship it"},
+  {t:"Master the basics and you will never fear any interview room. Any company. Any panel.",a:"— The foundation principle"},
+  // closing fire
+  {t:"56 days from now you'll either wish you had started today, or be glad you did.",a:"— The only two options"},
+  {t:"The next Verisk-level company is hiring. Are you going to be ready this time?",a:"— The question that should get you off the couch"},
+  {t:"You have 11 years, a Playwright framework you built from scratch, and now SQL + Python + XPath. Who stops you?",a:"— Nobody. That's who."},
+  {t:"Every morning you open this tracker before they open LinkedIn is a morning you're building an edge.",a:"— The edge"},
+  {t:"Don't just learn API testing. Learn it so deep that when they ask about retry logic, you smile.",a:"— The target state"},
+  {t:"The interviewer asked if you could write retry logic. Next time, you'll say: which flavor? With backoff? With response return? Or just True/False?",a:"— Day 56 version of you"},
+];
+let quoteIdx = Math.floor(Math.random() * QUOTES.length);
+function nextQuote(){quoteIdx=(quoteIdx+1)%QUOTES.length;document.getElementById('quote-text').textContent=QUOTES[quoteIdx].t;document.getElementById('quote-author').textContent=QUOTES[quoteIdx].a}
+document.getElementById('quote-text').textContent=QUOTES[quoteIdx].t;
+document.getElementById('quote-author').textContent=QUOTES[quoteIdx].a;
+
+const WEEK_QUOTES = [
+  "Week 1 — Open Edureka Python Scripting Module 1 and SQL Essentials Module 1. Watch. Take notes. Practice each example. The seed you plant this week is the tree you climb into your next interview.",
+  "Week 2 — This is where functions click. Every function you write this week makes you a faster, cleaner coder. Edureka Module 3 starts here. The Verisk panel wanted to see this thinking. Show it.",
+  "Week 3 — OOP. Retry logic. XPath. Read that again. These are the three exact things Verisk said you were missing. This week is the most important week of the 56. Don't skip a single day.",
+  "Week 4 — You're now writing tests that verify the database after an API call. That is not beginner QA. That is senior QA engineering. Product companies pay well for exactly this.",
+  "Week 5 — Decorators. Generators. Context managers. SQL transactions. Authenticated API flows. You've crossed the line from 'learning Python' to 'writing Python like a developer.' Feel that shift.",
+  "Week 6 — Pytest conftest.py. Session fixtures. Allure reports with steps and attachments. This is the test infrastructure layer. This is what a senior QA engineer builds on Day 1 at a new company.",
+  "Week 7 — Docker. Git PR workflow. Jenkins CI. This week you stop being a tester who writes scripts and become an engineer who ships reliable, automated pipelines. That's the promotion.",
+  "Week 8 — No new videos. No new theory. Just build. The project you complete this week is the thing you show in your next interview when they ask 'what have you built recently?' Have a good answer.",
+];
+
+const LEVELS = [
+  {name:"🌱 Beginner",next:"Practitioner",min:0,max:100},
+  {name:"⚙️ Practitioner",next:"Engineer",min:101,max:250},
+  {name:"🔧 Engineer",next:"Expert",min:251,max:450},
+  {name:"🎯 Expert",next:"Master",min:451,max:700},
+  {name:"🏆 Master",next:"Legend",min:701,max:1000},
+  {name:"🌟 Legend",next:"Champion",min:1001,max:1400},
+  {name:"💎 Champion",next:"Complete",min:1401,max:2000},
+];
+
+const PLAN = [
+{month:1,title:"Month 1 — Must-Have Foundations",weeks:[
+  {week:1,theme:"Python syntax · SQL basics · REST concepts",quote:WEEK_QUOTES[0],
+   watch:[
+     {src:'e',label:'Edureka: Python Session 1 — Variables, data types (int/float/str/list/dict/set), operators, if/elif/else, for/while loops, sys.argv',url:'https://learning.edureka.co/classroom/presentation/777/7012/123381?tab=CourseContent'},
+     {src:'e',label:'Edureka: SQL Essentials – Module 1 (DDL: CREATE, Data Types, Constraints)',url:'https://www.edureka.co/sql-essentials-training'},
+     {src:'p',label:'Practice: requests library hands-on (no course needed — just pip install + code)'},
+   ],days:[
+    {day:1,label:"Variables, data types, first API call",tasks:[
+      {tag:"py",t:"Write 5 variables: name='Raghava', exp=11, is_qa=True, rate=9.5, tools=None. Print each with its type using type()"},
+      {tag:"py",t:"Create list: tools=['Playwright','Pytest','Python','Git','Docker']. Print with enumerate: '1. Playwright', '2. Pytest'..."},
+      {tag:"py",t:"Create dict: {'name':'Raghava','role':'QA','city':'Hyderabad','exp':11}. Loop .items() and print 'name: Raghava'"},
+      {tag:"sql",t:"Write query: SELECT first_name, last_name, department FROM employees"},
+      {tag:"sql",t:"Write query: SELECT * FROM products ORDER BY price DESC LIMIT 5"},
+      {tag:"api",t:"Memorize HTTP methods: GET=read, POST=create, PUT=replace, PATCH=partial update, DELETE=remove"},
+      {tag:"api",t:"Memorize status codes: 200 OK, 201 Created, 204 No Content, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Server Error"},
+      {tag:"do",t:"pip install requests. Then run:",code:"import requests\nr = requests.get('https://jsonplaceholder.typicode.com/posts/1')\nprint(r.status_code)        # should print 200\nprint(r.json()['title'])    # should print the post title"},
+    ]},
+    {day:2,label:"if/elif/else, loops, assert status code",tasks:[
+      {tag:"py",t:"Write if/elif/else: given score=85, print 'A' if >=90, 'B' if >=80, 'C' if >=70, 'Fail' otherwise. Test 4 values."},
+      {tag:"py",t:"for loop with range: for i in range(1,57): print(f'Day {i} of 56'). Then modify to print only even days."},
+      {tag:"py",t:"while loop: count=1; while count<=10: print(count); count+=1. Add break when count==6 and test."},
+      {tag:"sql",t:"Write query: SELECT name FROM users WHERE city='Hyderabad' ORDER BY name"},
+      {tag:"sql",t:"Write query: SELECT name, salary FROM employees WHERE salary > 50000 AND department='QA'"},
+      {tag:"sql",t:"Write query: SELECT * FROM orders WHERE status='pending' OR status='processing' ORDER BY created_at DESC"},
+      {tag:"api",t:"Say these status codes aloud from memory: 200, 201, 204, 400, 401, 403, 404, 422, 500. What does each mean?"},
+      {tag:"do",t:"Assert status code in Python:",code:"r = requests.get('https://jsonplaceholder.typicode.com/posts/1')\nassert r.status_code == 200, f'Expected 200, got {r.status_code}'\nprint('✓ Status code check passed')"},
+    ]},
+    {day:3,label:"Lists, dicts, GET with params, SQL ORDER BY",tasks:[
+      {tag:"py",t:"List operations: append, remove, pop, index, len, sort, reverse. Create a list of 5 numbers, do each operation, print result."},
+      {tag:"py",t:"Dict operations: add key, update key, delete key, .get() with default. Create a user dict and modify it."},
+      {tag:"py",t:"Nested: create list of dicts: [{'name':'A','score':90}, {'name':'B','score':75}]. Print each person's name and score."},
+      {tag:"sql",t:"Write query: SELECT DISTINCT city FROM users ORDER BY city ASC"},
+      {tag:"sql",t:"Write query: SELECT department, COUNT(*) AS total FROM employees GROUP BY department (preview — full GROUP BY next week)"},
+      {tag:"api",t:"GET with params:",code:"r = requests.get(\n  'https://jsonplaceholder.typicode.com/posts',\n  params={'userId': 1}\n)\nprint(f'Found {len(r.json())} posts by user 1')\nprint(r.url)   # see full URL with ?userId=1"},
+      {tag:"do",t:"Write a loop: call posts API, filter only posts where userId==1, print their titles. Practice list filtering with a condition."},
+    ]},
+    {day:4,label:"String methods, NULL, response JSON parsing",tasks:[
+      {tag:"py",t:"String methods: upper(), lower(), strip(), split(), join(), replace(), startswith(), endswith(). Write one example each."},
+      {tag:"py",t:"f-strings: name='Raghava'; print(f'Hello {name}, you have {11} years of exp'). Try expressions: print(f'2+2={2+2}')"},
+      {tag:"py",t:"String split + join: sentence='Python is the best'. words=sentence.split(). Print each word. Rejoin with '-'."},
+      {tag:"sql",t:"Write query: SELECT * FROM employees WHERE manager_id IS NULL (find top-level employees)"},
+      {tag:"sql",t:"Write query: SELECT name, COALESCE(phone, 'No phone') AS phone FROM users"},
+      {tag:"api",t:"Parse nested JSON response:",code:"r = requests.get('https://jsonplaceholder.typicode.com/users/1')\ndata = r.json()\nprint(data['name'])               # direct field\nprint(data['address']['city'])    # nested field\nprint(data['company']['name'])    # 2 levels deep"},
+      {tag:"do",t:"GET all 10 users, extract only name and email from each, print as table: 'Leanne Graham | Sincere@april.biz'"},
+    ]},
+    {day:5,label:"BETWEEN/IN/LIKE, POST request, dict comprehension",tasks:[
+      {tag:"py",t:"List comprehension: squares=[x**2 for x in range(1,11)]. Even numbers: [x for x in range(20) if x%2==0]. Try 3 variations."},
+      {tag:"py",t:"Dict comprehension: {name:len(name) for name in ['Python','SQL','API','Docker']}. Print it."},
+      {tag:"sql",t:"Write query: SELECT * FROM orders WHERE total_amount BETWEEN 100 AND 500"},
+      {tag:"sql",t:"Write query: SELECT name FROM users WHERE city IN ('Hyderabad','Bangalore','Chennai')"},
+      {tag:"sql",t:"Write query: SELECT * FROM employees WHERE name LIKE 'R%' (starts with R). Also try '%a' and '%ava%'"},
+      {tag:"api",t:"POST request — create a resource:",code:"payload = {'title': 'Test Post', 'body': 'Learning API testing', 'userId': 1}\nr = requests.post(\n  'https://jsonplaceholder.typicode.com/posts',\n  json=payload\n)\nprint(r.status_code)   # 201 Created\nprint(r.json())        # includes 'id' of new resource"},
+      {tag:"do",t:"POST 3 different payloads. Assert each returns 201. Print the returned id for each."},
+    ]},
+    {day:6,label:"Request headers, PUT/DELETE, Boolean logic",tasks:[
+      {tag:"py",t:"Boolean logic: and, or, not. Write: (age>18 and has_job) or is_student. Create vars, evaluate, print result."},
+      {tag:"py",t:"Truthiness: which values are falsy? 0, '', None, [], {}, False. Test each with if val: print('truthy') else: print('falsy')"},
+      {tag:"sql",t:"Write query: SELECT name, salary FROM employees WHERE department='QA' AND salary BETWEEN 40000 AND 80000"},
+      {tag:"sql",t:"Write query: SELECT * FROM products WHERE stock=0 OR (price>1000 AND category='Electronics')"},
+      {tag:"api",t:"PUT (update) + DELETE:",code:"# PUT - update a post\nr = requests.put('https://jsonplaceholder.typicode.com/posts/1',\n  json={'title':'Updated','body':'Updated body','userId':1})\nprint(r.status_code)  # 200\n\n# DELETE\nr = requests.delete('https://jsonplaceholder.typicode.com/posts/1')\nprint(r.status_code)  # 200 (JSONPlaceholder simulates it)"},
+      {tag:"api",t:"Add headers to a request:",code:"headers = {\n  'Authorization': 'Bearer my_token_here',\n  'Content-Type': 'application/json',\n  'Accept': 'application/json'\n}\nr = requests.get(url, headers=headers)\nprint(r.status_code)"},
+      {tag:"do",t:"Write a script: GET user 1 → PUT to update their name → GET again → assert name changed. Full update cycle."},
+    ]},
+    {day:7,label:"Week 1 Review — write everything from memory",tasks:[
+      {tag:"rev",t:"Python from memory: write variables (5 types), for loop, while loop, list, dict, list comprehension — no notes, in 10 min"},
+      {tag:"rev",t:"SQL from memory: write 5 SELECT queries with WHERE, ORDER BY, LIMIT, IS NULL, IN, LIKE — no notes"},
+      {tag:"rev",t:"Status codes from memory: say and write all 8 codes (200,201,204,400,401,403,404,500). What does each mean?"},
+      {tag:"do",t:"Build this from scratch (no copy-paste):",code:"import requests\n# 1. GET all posts\nr = requests.get('https://jsonplaceholder.typicode.com/posts')\nassert r.status_code == 200\n\n# 2. Filter posts by userId=1\nposts = [p for p in r.json() if p['userId']==1]\n\n# 3. Print titles\nfor i, post in enumerate(posts, 1):\n    print(f'{i}. {post[\"title\"]}')\n\nprint(f'\\nTotal: {len(posts)} posts')"},
+    ]},
+  ]},
+  {week:2,theme:"Functions · JOINs · real API testing",quote:WEEK_QUOTES[1],
+   watch:[
+     {src:'e',label:'Edureka: Python Session 3 — def/return, lambda, map/filter/reduce, *args/**kwargs, scope, built-in functions — watch FIRST HALF',url:'https://learning.edureka.co/classroom/presentation/777/7014/123389?tab=CourseContent'},
+     {src:'e',label:'Edureka: SQL Essentials – Module 3 (Retrieve from multiple tables: JOINs)',url:'https://www.edureka.co/sql-essentials-training'},
+     {src:'u',label:'Udemy: REST API Testing Python+Pytest+Allure – Sections 1–4 (start here Day 12)',url:'https://www.udemy.com/course-dashboard-redirect/?course_id='},
+   ],days:[
+    {day:8,label:"def, return, INNER JOIN, wrap API in function",tasks:[
+      {tag:"py",t:"Write 3 functions: add(a,b) returns a+b. is_even(n) returns True/False. greet(name) returns 'Hello, name!'"},
+      {tag:"py",t:"Function with multiple returns: write get_grade(score) that returns both letter and message: return 'A', 'Excellent'"},
+      {tag:"sql",t:"Write INNER JOIN: SELECT u.name, o.amount FROM users u INNER JOIN orders o ON u.id = o.user_id"},
+      {tag:"sql",t:"Write INNER JOIN: SELECT e.name, d.department_name FROM employees e INNER JOIN departments d ON e.dept_id = d.id"},
+      {tag:"api",t:"Wrap API calls in functions:",code:"BASE_URL = 'https://jsonplaceholder.typicode.com'\n\ndef get_post(post_id):\n    r = requests.get(f'{BASE_URL}/posts/{post_id}')\n    return r\n\ndef get_user(user_id):\n    r = requests.get(f'{BASE_URL}/users/{user_id}')\n    return r\n\n# Use them\npost = get_post(1)\nprint(post.status_code, post.json()['title'])"},
+      {tag:"do",t:"Write get_posts_by_user(user_id) function: calls API, returns list of post titles for that user. Call it for users 1, 2, 3."},
+    ]},
+    {day:9,label:"Default args, *args, **kwargs, LEFT JOIN",tasks:[
+      {tag:"py",t:"Default args: def greet(name, greeting='Hello'): return f'{greeting}, {name}!'. Call with and without greeting argument."},
+      {tag:"py",t:"*args: def add(*nums): return sum(nums). Call: add(1,2,3), add(10,20,30,40). Print result each time."},
+      {tag:"py",t:"**kwargs: def show_user(**data): for k,v in data.items(): print(f'{k}: {v}'). Call: show_user(name='Raghava', role='QA')"},
+      {tag:"sql",t:"Write LEFT JOIN: SELECT u.name, o.amount FROM users u LEFT JOIN orders o ON u.id = o.user_id (shows users with NO orders too)"},
+      {tag:"sql",t:"Compare: run INNER JOIN vs LEFT JOIN on same tables. Notice which rows disappear. Understand the difference."},
+      {tag:"api",t:"Make your API function flexible:",code:"def api_call(endpoint, method='GET', data=None, token=None):\n    headers = {'Authorization': f'Bearer {token}'} if token else {}\n    if method == 'GET':\n        return requests.get(f'{BASE_URL}{endpoint}', headers=headers)\n    elif method == 'POST':\n        return requests.post(f'{BASE_URL}{endpoint}', json=data, headers=headers)"},
+      {tag:"do",t:"Write a function get_comments_for_post(post_id) that calls /posts/{id}/comments and returns list of commenter emails."},
+    ]},
+    {day:10,label:"Modules, import, 3-table JOIN, response validation",tasks:[
+      {tag:"py",t:"Create utils.py with: BASE_URL = '...'. Then in main.py: from utils import BASE_URL. Practice import patterns."},
+      {tag:"py",t:"Use os module: import os; print(os.getcwd()); print(os.listdir('.')). Use json: import json; print(json.dumps({'a':1}, indent=2))"},
+      {tag:"sql",t:"Write 3-table JOIN: SELECT u.name, o.id, p.product_name FROM users u JOIN orders o ON u.id=o.user_id JOIN products p ON o.product_id=p.id"},
+      {tag:"sql",t:"Write 5 JOIN queries — vary the tables, vary INNER vs LEFT. Focus on understanding ON condition."},
+      {tag:"api",t:"Validate full response structure:",code:"r = requests.get('https://jsonplaceholder.typicode.com/users/1')\ndata = r.json()\n\n# Assert status\nassert r.status_code == 200\n\n# Assert required fields exist\nassert 'id' in data\nassert 'name' in data\nassert 'email' in data\nassert '@' in data['email']\nassert isinstance(data['id'], int)\nassert len(data['name']) > 0\nprint('✓ All validations passed')"},
+      {tag:"do",t:"Write validate_user(user_id) function: calls API, runs 5 assertions on the response, returns True/False with message."},
+    ]},
+    {day:11,label:"try/except, UNION, safe API calls",tasks:[
+      {tag:"py",t:"try/except basics: try: int('abc') except ValueError as e: print(f'Error: {e}'). Test with 5 different error types."},
+      {tag:"py",t:"Multiple except blocks: try: 1/0 except ZeroDivisionError: ... except Exception as e: ... finally: print('always runs')"},
+      {tag:"sql",t:"Write UNION: SELECT name FROM customers UNION SELECT name FROM employees (removes duplicates)"},
+      {tag:"sql",t:"Write UNION ALL: SELECT name FROM customers UNION ALL SELECT name FROM employees (keeps duplicates). Note the difference."},
+      {tag:"api",t:"Safe API wrapper with try/except:",code:"def safe_get(url):\n    try:\n        r = requests.get(url, timeout=5)\n        r.raise_for_status()  # raises exception if 4xx or 5xx\n        return r.json()\n    except requests.exceptions.Timeout:\n        print('Request timed out')\n        return None\n    except requests.exceptions.HTTPError as e:\n        print(f'HTTP error: {e}')\n        return None\n    except Exception as e:\n        print(f'Unexpected error: {e}')\n        return None"},
+      {tag:"do",t:"Call safe_get() with: valid URL, invalid URL, URL that returns 404. Observe which except block catches each."},
+    ]},
+    {day:12,label:"File I/O, JSON files, parametrize API calls",tasks:[
+      {tag:"py",t:"Write to file: with open('test.txt','w') as f: f.write('Hello'). Read back: with open('test.txt','r') as f: print(f.read())"},
+      {tag:"py",t:"JSON file: save API response to file: json.dump(r.json(), open('response.json','w'), indent=2). Read it back."},
+      {tag:"sql",t:"Write: SELECT u.name, COUNT(o.id) AS total_orders FROM users u LEFT JOIN orders o ON u.id=o.user_id GROUP BY u.id, u.name"},
+      {tag:"sql",t:"Write 5 more JOIN queries practicing different scenarios. Try: find users who never ordered (LEFT JOIN + WHERE o.id IS NULL)"},
+      {tag:"api",t:"Load test data from JSON and run multiple API calls:",code:"import json\n\n# Create test_ids.json with content: [1, 2, 3, 4, 5]\nids = json.load(open('test_ids.json'))\n\nfor post_id in ids:\n    r = requests.get(f'{BASE_URL}/posts/{post_id}')\n    assert r.status_code == 200\n    print(f'Post {post_id}: {r.json()[\"title\"][:40]}')"},
+      {tag:"do",t:"Create users.json with 3 user payloads. Loop through and POST each one. Assert each returns 201. Print returned ids."},
+    ]},
+    {day:13,label:"Lambda, map, filter, aliases, CRUD in functions",tasks:[
+      {tag:"py",t:"Lambda: double = lambda x: x*2. sort by key: users.sort(key=lambda u: u['name']). Use in sorted()."},
+      {tag:"py",t:"map(): names=['raghava','john']; upper_names=list(map(lambda n: n.upper(), names)). Try with numbers too."},
+      {tag:"py",t:"filter(): nums=[1,2,3,4,5,6]; evens=list(filter(lambda n: n%2==0, nums)). Filter API response by a condition."},
+      {tag:"sql",t:"Column alias: SELECT name AS full_name, salary AS monthly_pay FROM employees WHERE dept='QA'"},
+      {tag:"sql",t:"Table alias: SELECT e.name, d.name AS dept_name FROM employees e JOIN departments d ON e.dept_id=d.id"},
+      {tag:"api",t:"Build a mini CRUD module in functions:",code:"def create_post(title, body, user_id):\n    r = requests.post(f'{BASE_URL}/posts', json={'title':title,'body':body,'userId':user_id})\n    assert r.status_code == 201\n    return r.json()['id']\n\ndef get_post(post_id):\n    r = requests.get(f'{BASE_URL}/posts/{post_id}')\n    assert r.status_code == 200\n    return r.json()\n\ndef delete_post(post_id):\n    r = requests.delete(f'{BASE_URL}/posts/{post_id}')\n    assert r.status_code == 200"},
+      {tag:"do",t:"Use above functions: create → get → delete. Verify each step. Chain them: id = create_post(...); get_post(id); delete_post(id)"},
+    ]},
+    {day:14,label:"Week 2 Review — functions + JOINs + API chain",tasks:[
+      {tag:"rev",t:"Write from memory: function with default args, function with *args, function with **kwargs — 3 separate functions, no notes"},
+      {tag:"rev",t:"Write from memory: INNER JOIN, LEFT JOIN, 3-table JOIN — all with correct syntax, no notes, timed 8 minutes"},
+      {tag:"rev",t:"Write from memory: safe API function with try/except that handles Timeout, HTTPError, and generic Exception"},
+      {tag:"do",t:"Full integration from scratch (no notes, 20 min):",code:"# 1. Load post IDs from JSON file\n# 2. For each ID, GET the post with safe_get()\n# 3. Filter only posts with title length > 40 chars\n# 4. Sort by userId\n# 5. Print: 'User X: Title...'\n# 6. Write results to output.json"},
+    ]},
+  ]},
+  {week:3,theme:"OOP · GROUP BY · Retry logic · XPath",quote:WEEK_QUOTES[2],
+   watch:[
+     {src:'e',label:'Edureka: Python Session 3 — OOP: class/__init__, inheritance (single/multi/multilevel), polymorphism, modules (sys/os/math/json), regex, exception handling — SECOND HALF',url:'https://learning.edureka.co/classroom/presentation/777/7014/123389?tab=CourseContent'},
+     {src:'e',label:'Edureka: SQL Essentials – Module 4 (Inbuilt Functions: COUNT, SUM, AVG, GROUP BY, HAVING)',url:'https://www.edureka.co/sql-essentials-training'},
+     {src:'e',label:'Edureka: Selenium Session 4 — XPath (absolute/relative, contains(), starts-with(), text(), AND/OR, index, chained), CSS selectors (ID/class/attribute), all 7 locator types, WebDriver commands',url:'https://learning.edureka.co/classroom/presentation/1964/17287/1540251?tab=CourseContent'},
+     {src:'u',label:'Udemy: REST API Testing Python+Pytest+Allure – Sections 5–8',url:'https://www.udemy.com/course-dashboard-redirect/?course_id='},
+     {src:'p',label:'Practice: XPath — after watching Session 4, open any site in Chrome. Use $x("//div[@class=\'error\']") in DevTools console.'},
+   ],days:[
+    {day:15,label:"class + __init__ + COUNT/SUM + retry concept",tasks:[
+      {tag:"py",t:"Write your first class: class Dog: def __init__(self, name, age): self.name=name; self.age=age. Create 2 dogs, print their attributes."},
+      {tag:"py",t:"Add method: def bark(self): return f'{self.name} says Woof!'. Call dog.bark(). Add describe(): return f'{self.name} is {self.age} years old'"},
+      {tag:"sql",t:"GROUP BY + COUNT: SELECT city, COUNT(*) AS user_count FROM users GROUP BY city ORDER BY user_count DESC"},
+      {tag:"sql",t:"GROUP BY + SUM: SELECT department, SUM(salary) AS total_payroll FROM employees GROUP BY department"},
+      {tag:"api",t:"Retry concept — write this from scratch:",code:"def call_with_retry(url, retries=5):\n    for attempt in range(1, retries+1):\n        print(f'Attempt {attempt}...')\n        r = requests.get(url)\n        if r.status_code == 200:\n            print(f'✓ Success on attempt {attempt}')\n            return True\n    print('✗ All attempts failed')\n    return False"},
+      {tag:"dx",t:"XPath basics: //div (any div), //div[@id='main'] (by id), //input[@type='text'] (by attr). Write 5 XPath expressions for a login form."},
+    ]},
+    {day:16,label:"Instance methods, AVG/MAX, retry returns response, XPath contains",tasks:[
+      {tag:"py",t:"Add __str__ to your class: def __str__(self): return f'Dog({self.name}, {self.age}yr)'. Print dog directly: print(dog)"},
+      {tag:"py",t:"Private convention: self._name (single underscore = protected), self.__name (double = name-mangled). Write example."},
+      {tag:"sql",t:"GROUP BY + AVG: SELECT department, AVG(salary) AS avg_salary, MAX(salary) AS max_salary FROM employees GROUP BY department"},
+      {tag:"sql",t:"Write 5 GROUP BY queries mixing COUNT, SUM, AVG, MAX, MIN — different tables, different columns"},
+      {tag:"api",t:"Retry version that returns the response:",code:"def get_with_retry(url, retries=5):\n    for attempt in range(retries):\n        r = requests.get(url)\n        if r.status_code == 200:\n            return r   # return the actual response\n    return None        # all retries exhausted\n\nresult = get_with_retry('https://jsonplaceholder.typicode.com/posts/1')\nif result:\n    print(result.json()['title'])"},
+      {tag:"dx",t:"XPath contains: //div[contains(@class,'error')], //a[contains(@href,'login')], //button[contains(text(),'Submit')]. Write 6 expressions."},
+    ]},
+    {day:17,label:"OOP inheritance, HAVING, retry in class, XPath text + index",tasks:[
+      {tag:"py",t:"Inheritance: class Animal: def __init__(self,name): self.name=name. class Dog(Animal): def speak(self): return 'Woof'. class Cat(Animal): def speak(self): return 'Meow'"},
+      {tag:"py",t:"super(): class Dog(Animal): def __init__(self,name,breed): super().__init__(name); self.breed=breed. Print both name and breed."},
+      {tag:"sql",t:"HAVING (filters groups): SELECT city, COUNT(*) AS cnt FROM users GROUP BY city HAVING COUNT(*) > 5"},
+      {tag:"sql",t:"GROUP BY + HAVING + ORDER BY: SELECT dept, AVG(salary) AS avg FROM employees GROUP BY dept HAVING AVG(salary) > 60000 ORDER BY avg DESC"},
+      {tag:"api",t:"Build APIClient class with retry:",code:"class APIClient:\n    def __init__(self, base_url, token=None):\n        self.base_url = base_url\n        self.token = token\n        self.session = requests.Session()\n        if token:\n            self.session.headers['Authorization'] = f'Bearer {token}'\n\n    def get(self, endpoint):\n        return self.session.get(f'{self.base_url}{endpoint}')\n\n    def get_with_retry(self, endpoint, retries=5):\n        for _ in range(retries):\n            r = self.get(endpoint)\n            if r.status_code == 200:\n                return r\n        return None"},
+      {tag:"dx",t:"XPath text and index: //a[text()='Login'], //a[contains(text(),'Sign in')], (//button)[1], (//button)[last()], (//tr)[3]/td[2]. Write 8 expressions."},
+    ]},
+    {day:18,label:"Static/class methods, subquery preview, PATCH, XPath nested",tasks:[
+      {tag:"py",t:"@staticmethod: class MathHelper: @staticmethod def add(a,b): return a+b. Call: MathHelper.add(3,4). No self needed."},
+      {tag:"py",t:"@classmethod: class Config: base_url='http://api.com'; @classmethod def from_env(cls): cls.base_url=os.getenv('API_URL'); return cls()"},
+      {tag:"sql",t:"Subquery preview: SELECT name FROM users WHERE id IN (SELECT user_id FROM orders WHERE amount > 500). Write 3 like this."},
+      {tag:"sql",t:"Review: write 10 GROUP BY + HAVING queries from memory. Mix COUNT, SUM, AVG. No notes. Timed 15 min."},
+      {tag:"api",t:"PATCH (partial update) vs PUT (full replace):",code:"# PATCH — only send what you want to change\nr = requests.patch(\n  'https://jsonplaceholder.typicode.com/posts/1',\n  json={'title': 'Only title changed'}\n)\nprint(r.status_code, r.json())\n\n# PUT — must send full object\nr = requests.put(\n  'https://jsonplaceholder.typicode.com/posts/1',\n  json={'title':'Full','body':'Replaced','userId':1}\n)"},
+      {tag:"dx",t:"XPath nested: //form//input[@type='password'], //table//tr//td[1], //div[@id='content']//p[1]. Write 8 nested XPath expressions."},
+    ]},
+    {day:19,label:"Full APIClient, GROUP BY review, retry timing, XPath patterns",tasks:[
+      {tag:"py",t:"Add post() and delete() to APIClient. Add handle_response(r) method that checks status, raises exception if error."},
+      {tag:"py",t:"Add timeout: self.session.get(url, timeout=10). Add set_token(token) method. Test with actual calls."},
+      {tag:"sql",t:"Write 5 queries with table aliases AND GROUP BY + HAVING combined — clean, readable SQL"},
+      {tag:"sql",t:"Write: find departments where average salary > total company average. (subquery inside HAVING)"},
+      {tag:"api",t:"Add retry with backoff (pause between retries):",code:"import time\n\ndef get_with_backoff(url, retries=5, delay=1):\n    for attempt in range(retries):\n        r = requests.get(url)\n        if r.status_code == 200:\n            return r\n        print(f'Attempt {attempt+1} failed ({r.status_code}). Retrying in {delay}s...')\n        time.sleep(delay)\n    return None"},
+      {tag:"dx",t:"XPath challenge: write XPath for — 1) all error messages, 2) the 3rd row of a table, 3) a button inside a form, 4) a link that opens in new tab, 5) input not of type hidden. Write all 5."},
+    ]},
+    {day:20,label:"Complete OOP, mixed SQL, full APIClient, XPath review",tasks:[
+      {tag:"py",t:"Write a TestConfig class: stores base_url, token, timeout. Write QAAPIClient(TestConfig) that inherits from APIClient."},
+      {tag:"py",t:"Encapsulate CRUD: add create_post(title,body), update_post(id,title), delete_post(id) methods to APIClient."},
+      {tag:"sql",t:"Mixed challenge (no notes, 15 min): write INNER JOIN + GROUP BY + HAVING in one query. Then add a subquery inside WHERE."},
+      {tag:"sql",t:"Write: SELECT u.name, COUNT(o.id) AS orders FROM users u LEFT JOIN orders o ON u.id=o.user_id GROUP BY u.id HAVING COUNT(o.id)=0 (users with zero orders)"},
+      {tag:"api",t:"Finish APIClient — add logging:",code:"class APIClient:\n    def _log(self, method, url, status):\n        print(f'[{method}] {url} → {status}')\n\n    def get(self, endpoint):\n        url = f'{self.base_url}{endpoint}'\n        r = self.session.get(url)\n        self._log('GET', url, r.status_code)\n        return r"},
+      {tag:"dx",t:"XPath write-from-memory challenge: 15 expressions covering @attr, contains, text(), index, nested, starts-with. Timed 10 minutes. No notes."},
+    ]},
+    {day:21,label:"Week 3 Review — OOP, retry, XPath from memory",tasks:[
+      {tag:"rev",t:"Build APIClient from memory: __init__(base_url, token), get(), post(), delete(), get_with_retry(), _log(). No notes. 20 min."},
+      {tag:"rev",t:"Write from memory: call_with_retry() returning True/False AND get_with_retry() returning response. Both versions."},
+      {tag:"rev",t:"SQL from memory: 5 GROUP BY+HAVING queries, 3 subqueries, 3 JOINs — no notes, timed 15 min"},
+      {tag:"rev",t:"XPath from memory: write 15 expressions. Include: @attr, contains, text(), index [2], nested, starts-with, last(). Timed 10 min."},
+    ]},
+  ]},
+  {week:4,theme:"File handling · Subqueries · Pytest · DB verification",quote:WEEK_QUOTES[3],
+   watch:[
+     {src:'e',label:'Edureka: Python Session 2 — File I/O (open/read/write/close, all access modes r/w/a/rb/wb), Lists/Tuples/Strings/Sets/Dicts — full deep dive',url:'https://learning.edureka.co/classroom/presentation/777/7013/123386?tab=CourseContent'},
+     {src:'e',label:'Edureka: SQL Essentials – Module 5 (Advanced: subqueries, indexes)',url:'https://www.edureka.co/sql-essentials-training'},
+     {src:'u',label:'Udemy: REST API Testing Python+Pytest+Allure – Sections 9–12 (pytest + Allure)',url:'https://www.udemy.com/course-dashboard-redirect/?course_id='},
+   ],days:[
+    {day:22,label:"File I/O, subquery in WHERE, pytest basics, SQLite",tasks:[
+      {tag:"py",t:"Read/write text: with open('notes.txt','w') as f: f.write('line1\\nline2'). Read: with open('notes.txt') as f: lines=f.readlines(). Print each."},
+      {tag:"py",t:"JSON read/write: save={\"user\":\"Raghava\",\"exp\":11}; json.dump(save,open('save.json','w'),indent=2). Load: data=json.load(open('save.json'))"},
+      {tag:"sql",t:"Subquery in WHERE: SELECT name FROM users WHERE dept_id IN (SELECT id FROM departments WHERE name='Engineering')"},
+      {tag:"sql",t:"Subquery with NOT IN: SELECT name FROM employees WHERE id NOT IN (SELECT manager_id FROM employees WHERE manager_id IS NOT NULL)"},
+      {tag:"api",t:"First pytest test:",code:"# test_api.py\nimport requests, pytest\n\nBASE = 'https://jsonplaceholder.typicode.com'\n\ndef test_get_post_returns_200():\n    r = requests.get(f'{BASE}/posts/1')\n    assert r.status_code == 200\n\ndef test_post_has_required_fields():\n    r = requests.get(f'{BASE}/posts/1')\n    data = r.json()\n    assert 'id' in data\n    assert 'title' in data\n    assert 'body' in data\n\n# Run: pytest test_api.py -v"},
+      {tag:"do",t:"SQLite connect:",code:"import sqlite3\nconn = sqlite3.connect(':memory:')  # in-memory DB\nc = conn.cursor()\nc.execute('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)')\nc.execute(\"INSERT INTO users VALUES (1, 'Raghava', 'raghava@test.com')\")\nconn.commit()\nc.execute('SELECT * FROM users')\nprint(c.fetchall())"},
+    ]},
+    {day:23,label:"JSON test data, EXISTS, conftest, DB query in Python",tasks:[
+      {tag:"py",t:"Load test data from JSON: create test_data.json with [{\"id\":1,\"name\":\"Alice\"},{\"id\":2,\"name\":\"Bob\"}]. Load and loop."},
+      {tag:"py",t:"Exception chaining: try: int('bad') except ValueError as e: raise RuntimeError('Conversion failed') from e. Practice."},
+      {tag:"sql",t:"EXISTS: SELECT name FROM users u WHERE EXISTS (SELECT 1 FROM orders o WHERE o.user_id=u.id) (users who have orders)"},
+      {tag:"sql",t:"NOT EXISTS: SELECT name FROM users u WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.user_id=u.id) (users with no orders)"},
+      {tag:"api",t:"conftest.py with fixture:",code:"# conftest.py\nimport pytest, requests\n\n@pytest.fixture\ndef base_url():\n    return 'https://jsonplaceholder.typicode.com'\n\n@pytest.fixture\ndef sample_post():\n    return {'title':'Test','body':'Testing 123','userId':1}\n\n# test_api.py — use fixtures\ndef test_create_post(base_url, sample_post):\n    r = requests.post(f'{base_url}/posts', json=sample_post)\n    assert r.status_code == 201"},
+      {tag:"do",t:"Write verify_in_db(conn, name): c.execute('SELECT * FROM users WHERE name=?',(name,)); row=c.fetchone(); assert row is not None, f'{name} not in DB'"},
+    ]},
+    {day:24,label:"JSON param files, subquery in FROM, parametrize, fetchall",tasks:[
+      {tag:"py",t:"Custom exception: class APIError(Exception): def __init__(self,status,msg): self.status=status; super().__init__(f'[{status}] {msg}')"},
+      {tag:"py",t:"Raise and catch custom: def check_status(r): if r.status_code != 200: raise APIError(r.status_code, r.text). Try it."},
+      {tag:"sql",t:"Subquery in FROM (derived table): SELECT x.dept, x.avg_sal FROM (SELECT dept, AVG(salary) AS avg_sal FROM employees GROUP BY dept) x WHERE x.avg_sal > 60000"},
+      {tag:"sql",t:"Subquery in SELECT column: SELECT name, (SELECT COUNT(*) FROM orders WHERE user_id=u.id) AS order_count FROM users u"},
+      {tag:"api",t:"pytest parametrize:",code:"@pytest.mark.parametrize('post_id', [1, 2, 3, 4, 5])\ndef test_get_posts(base_url, post_id):\n    r = requests.get(f'{base_url}/posts/{post_id}')\n    assert r.status_code == 200\n    assert r.json()['id'] == post_id\n\n# Each post_id runs as a separate test case\n# Output: test_api.py::test_get_posts[1] PASSED"},
+      {tag:"do",t:"DB fetchall: c.execute('SELECT * FROM users WHERE active=1'); rows=c.fetchall(); assert len(rows) > 0; print(f'Found {len(rows)} active users')"},
+    ]},
+    {day:25,label:"Generators, INSERT+verify, session fixture, DB insert",tasks:[
+      {tag:"py",t:"Generator: def countdown(n): while n>0: yield n; n-=1. for x in countdown(5): print(x). List from gen: list(countdown(3))"},
+      {tag:"py",t:"Generator expression: gen=(x**2 for x in range(10)). next(gen) each time. Sum: sum(x**2 for x in range(10))."},
+      {tag:"sql",t:"INSERT with SELECT: INSERT INTO archive_orders SELECT * FROM orders WHERE created_at < '2024-01-01'"},
+      {tag:"sql",t:"UPDATE multiple rows: UPDATE employees SET salary = salary * 1.1 WHERE department='QA' (10% raise for QA team)"},
+      {tag:"api",t:"Session-scoped fixture for token:",code:"@pytest.fixture(scope='session')\ndef auth_token():\n    # In real project: POST to /auth and return token\n    return 'fake_token_for_testing'\n\n@pytest.fixture(scope='session')\ndef client(auth_token):\n    from api_client import APIClient\n    return APIClient('https://jsonplaceholder.typicode.com', auth_token)\n\ndef test_get_user(client):\n    r = client.get('/users/1')\n    assert r.status_code == 200"},
+      {tag:"do",t:"After POST: extract id from response → INSERT same data into SQLite → SELECT by id → assert data matches API response"},
+    ]},
+    {day:26,label:"Decorators, DELETE+verify, Allure intro, UPDATE verify",tasks:[
+      {tag:"py",t:"Decorator: def log_call(func): def wrapper(*args,**kwargs): print(f'Calling {func.__name__}'); result=func(*args,**kwargs); print('Done'); return result; return wrapper"},
+      {tag:"py",t:"Apply: @log_call def get_post(id): return requests.get(...). Call get_post(1) and see log output."},
+      {tag:"sql",t:"DELETE safely: DELETE FROM orders WHERE status='cancelled' AND created_at < '2023-01-01'. Always test with SELECT first."},
+      {tag:"sql",t:"Transaction: BEGIN; UPDATE accounts SET balance=balance-500 WHERE id=1; UPDATE accounts SET balance=balance+500 WHERE id=2; COMMIT; (bank transfer)"},
+      {tag:"api",t:"Allure setup:",code:"# pip install allure-pytest\nimport allure\n\n@allure.title('Verify GET /posts/1 returns valid post')\n@allure.description('Calls the posts endpoint and validates all required fields')\ndef test_get_post_with_allure(base_url):\n    with allure.step('Send GET request to /posts/1'):\n        r = requests.get(f'{base_url}/posts/1')\n    with allure.step('Assert status code is 200'):\n        assert r.status_code == 200\n    with allure.step('Assert response has required fields'):\n        assert 'id' in r.json()\n        assert 'title' in r.json()\n# Run: pytest --alluredir=allure-results\n# View: allure serve allure-results"},
+      {tag:"do",t:"After PUT update: SELECT updated field from DB → assert value changed. After DELETE: SELECT by id → assert fetchone() is None."},
+    ]},
+    {day:27,label:"Full flow: POST → assert → DB → DELETE → verify gone",tasks:[
+      {tag:"py",t:"Context manager: class DBConnection: def __enter__(self): self.conn=sqlite3.connect('test.db'); return self.conn. def __exit__(self,*args): self.conn.close()"},
+      {tag:"py",t:"Use it: with DBConnection() as conn: c=conn.cursor(); c.execute('SELECT * FROM users'); print(c.fetchall())"},
+      {tag:"sql",t:"Correlated subquery: SELECT name, salary FROM employees e WHERE salary > (SELECT AVG(salary) FROM employees WHERE dept=e.dept) — above dept average"},
+      {tag:"sql",t:"Write 5 complex subqueries: IN, NOT IN, EXISTS, NOT EXISTS, scalar subquery in WHERE"},
+      {tag:"api",t:"Full CRUD test with DB verification at every step:",code:"def test_full_user_lifecycle(base_url, db_conn):\n    # 1. CREATE\n    payload = {'title':'My Post','body':'Content','userId':1}\n    r = requests.post(f'{base_url}/posts', json=payload)\n    assert r.status_code == 201\n    post_id = r.json()['id']\n\n    # 2. READ\n    r = requests.get(f'{base_url}/posts/{post_id}')\n    assert r.status_code == 200\n\n    # 3. UPDATE\n    r = requests.put(f'{base_url}/posts/{post_id}',\n        json={**payload, 'title':'Updated Title'})\n    assert r.status_code == 200\n\n    # 4. DELETE\n    r = requests.delete(f'{base_url}/posts/{post_id}')\n    assert r.status_code == 200"},
+      {tag:"do",t:"Add DB verification to each step above. Mock DB with SQLite — insert after create, select to verify update, verify gone after delete."},
+    ]},
+    {day:28,label:"Month 1 COMPLETE 🎉 — write everything from memory",tasks:[
+      {tag:"rev",t:"Python from memory (20 min): class with __init__+methods+inheritance, decorator, generator, context manager, file I/O, JSON — all in one script"},
+      {tag:"rev",t:"SQL from memory (15 min): INNER JOIN + GROUP BY + HAVING + subquery in WHERE + subquery in FROM — write each, no notes"},
+      {tag:"rev",t:"Pytest from memory (15 min): conftest.py with session fixture + parametrize test + Allure step — write from scratch"},
+      {tag:"rev",t:"Full test from memory (10 min): POST → assert 201 → fake DB insert → GET → assert 200 → fields check → DELETE → assert 200"},
+    ]},
+  ]},
+]},
+{month:2,title:"Month 2 — Depth + Good-to-Haves",weeks:[
+  {week:5,theme:"Advanced Python · SQL transactions · Auth patterns",quote:WEEK_QUOTES[4],
+   watch:[
+     {src:'u',label:'Udemy: Complete Python Bootcamp (Jose Portilla) – Sections on comprehensions, lambda, generators, decorators',url:'https://www.udemy.com/course-dashboard-redirect/?course_id=567828'},
+     {src:'e',label:'Edureka: SQL Essentials – Module 2 (DML: transactions, SAVEPOINT, INSERT/UPDATE/DELETE)',url:'https://www.edureka.co/sql-essentials-training'},
+     {src:'u',label:'Udemy: REST API Testing Python+Pytest+Allure – Sections 13+ (auth, advanced flows)',url:'https://www.udemy.com/course-dashboard-redirect/?course_id='},
+     {src:'e',label:'Edureka: REST Assured Session 5 — OAuth 2.0 Client Credentials, Bearer token + .auth().oauth2(), POJO classes, Jackson/Gson Serialization/Deserialization, nested JSON mapping (Java concepts = Python equivalent)',url:'https://learning.edureka.co/classroom/presentation/2741/29625/1995738?tab=CourseContent'},
+   ],days:[
+    {day:29,label:"Comprehensions advanced, transactions, Bearer auth",tasks:[
+      {tag:"py",t:"Nested comprehension: matrix=[[1,2,3],[4,5,6]]; flat=[x for row in matrix for x in row]. Dict from two lists: {k:v for k,v in zip(['a','b'],['x','y'])}"},
+      {tag:"py",t:"Conditional expression: 'even' if n%2==0 else 'odd'. Use inside comprehension: [('even' if x%2==0 else 'odd') for x in range(10)]"},
+      {tag:"sql",t:"Transaction with ROLLBACK: BEGIN; UPDATE accounts SET balance=balance-500 WHERE id=1; -- Oops, wrong account; ROLLBACK; (money restored)"},
+      {tag:"sql",t:"Savepoint: BEGIN; UPDATE...; SAVEPOINT sp1; UPDATE...; ROLLBACK TO sp1; COMMIT; — undo second but keep first update"},
+      {tag:"api",t:"Bearer auth flow:",code:"# Step 1: Login to get token\ndef login(username, password):\n    r = requests.post(f'{BASE}/auth/login',\n        json={'username':username,'password':password})\n    assert r.status_code == 200\n    return r.json()['token']\n\n# Step 2: Use token in all subsequent calls\ntoken = login('user','pass')\nheaders = {'Authorization': f'Bearer {token}'}\nr = requests.get(f'{BASE}/profile', headers=headers)\nassert r.status_code == 200"},
+      {tag:"do",t:"Write a session wrapper: login() → store token → get_authenticated(endpoint) auto-adds token → test with 3 protected endpoints"},
+    ]},
+    {day:30,label:"Lambda/map/filter, constraints, API key auth, CRUD",tasks:[
+      {tag:"py",t:"sorted() with key: users=[{'name':'Bob','age':30},{'name':'Alice','age':25}]; sorted(users, key=lambda u:u['age']). Reverse=True."},
+      {tag:"py",t:"map+filter together: nums=range(20); result=list(map(lambda x:x**2, filter(lambda x:x%2==0, nums))). Write, run, understand."},
+      {tag:"sql",t:"INSERT with constraint test: UNIQUE — try inserting duplicate email. See the error. Handle it in Python with try/except."},
+      {tag:"sql",t:"CHECK constraint: CREATE TABLE salaries (id INT, amount DECIMAL, CONSTRAINT chk_positive CHECK (amount > 0)). Try inserting negative."},
+      {tag:"api",t:"Three auth methods side by side:",code:"# 1. Bearer token in header\nrequests.get(url, headers={'Authorization':'Bearer TOKEN'})\n\n# 2. Basic auth (username:password encoded)\nrequests.get(url, auth=('username','password'))\n\n# 3. API key in header\nrequests.get(url, headers={'X-API-Key':'abc123'})\n\n# 4. API key as query param\nrequests.get(url, params={'api_key':'abc123'})"},
+      {tag:"do",t:"CRUD from memory: write create, read, update, delete functions + chain them in one test + assert at each step. No notes. Timed 20 min."},
+    ]},
+    {day:31,label:"Generators deep, INSERT SELECT, full auth API test",tasks:[
+      {tag:"py",t:"Generator with send(): def gen(): x=yield 'start'; print(f'Got: {x}'); yield 'end'. g=gen(); next(g); g.send('hello'). Advanced but important."},
+      {tag:"py",t:"Infinite generator: def counter(): n=0; while True: yield n; n+=1. gen=counter(); [next(gen) for _ in range(5)] — safely stop."},
+      {tag:"sql",t:"INSERT INTO backup SELECT * FROM orders WHERE status='completed' AND year=2023 — archive pattern"},
+      {tag:"sql",t:"UPDATE with JOIN: UPDATE o SET o.discount=10 FROM orders o JOIN users u ON o.user_id=u.id WHERE u.tier='premium'"},
+      {tag:"api",t:"Full authenticated test flow:",code:"@pytest.fixture(scope='session')\ndef auth_session():\n    s = requests.Session()\n    # Login\n    r = s.post(f'{BASE}/auth', json={'user':'test','pass':'test'})\n    s.headers['Authorization'] = f'Bearer {r.json()[\"token\"]}'\n    return s\n\ndef test_protected_endpoint(auth_session):\n    r = auth_session.get(f'{BASE}/me')\n    assert r.status_code == 200\n    assert 'email' in r.json()"},
+      {tag:"do",t:"Design a test that: logs in, creates a resource, verifies it's accessible, deletes it, verifies 404 after deletion — all authenticated"},
+    ]},
+    {day:32,label:"Decorators advanced, complex UPDATE, response validation depth",tasks:[
+      {tag:"py",t:"Decorator with args: def retry(times=3): def decorator(func): def wrapper(*a,**k): for _ in range(times): try: return func(*a,**k); except: pass; return decorator; return retry"},
+      {tag:"py",t:"Apply: @retry(times=5) def flaky_api(): ... . This is how retry works as a reusable decorator."},
+      {tag:"sql",t:"DELETE with subquery: DELETE FROM users WHERE id IN (SELECT user_id FROM sessions WHERE last_seen < '2023-01-01')"},
+      {tag:"sql",t:"Complex UPDATE: UPDATE products SET price=price*0.9, updated_at=NOW() WHERE category='Electronics' AND stock > 100"},
+      {tag:"api",t:"Deep response validation:",code:"def validate_user_response(data):\n    # Type checks\n    assert isinstance(data['id'], int), f'id should be int, got {type(data[\"id\"])}'\n    assert isinstance(data['name'], str), 'name should be string'\n    assert isinstance(data['email'], str), 'email should be string'\n\n    # Business rules\n    assert '@' in data['email'], 'email must contain @'\n    assert len(data['name']) >= 2, 'name too short'\n    assert data['id'] > 0, 'id must be positive'\n\n    return True"},
+      {tag:"do",t:"Write validate_post(data), validate_user(data), validate_comment(data) functions each with 5+ assertions. Reuse in tests."},
+    ]},
+    {day:33,label:"Context managers, TRUNCATE/DROP, error code testing",tasks:[
+      {tag:"py",t:"@contextmanager: from contextlib import contextmanager; @contextmanager; def timer(): start=time.time(); yield; print(f'{time.time()-start:.2f}s')"},
+      {tag:"py",t:"Use: with timer(): requests.get(url). Now wrap any slow operation to measure its time."},
+      {tag:"sql",t:"TRUNCATE TABLE orders (delete all rows, keep structure). DROP TABLE orders (delete table). When to use each?"},
+      {tag:"sql",t:"Review: write 10 DML queries (INSERT, UPDATE, DELETE) with subqueries and JOINs — no notes, timed 15 min"},
+      {tag:"api",t:"Test error responses deliberately:",code:"# Test 404\ndef test_get_nonexistent_post(base_url):\n    r = requests.get(f'{base_url}/posts/99999')\n    assert r.status_code == 404\n\n# Test 400 — bad payload\ndef test_create_post_bad_payload(base_url):\n    r = requests.post(f'{base_url}/posts', json={})\n    # Note: JSONPlaceholder accepts anything, but in real app:\n    # assert r.status_code == 400\n    # assert 'error' in r.json()"},
+      {tag:"do",t:"Write tests for error paths: missing required field (400), wrong auth token (401), non-existent resource (404). One test per error."},
+    ]},
+    {day:34,label:"args/kwargs deep, ROLLUP, full parametrize CRUD",tasks:[
+      {tag:"py",t:"Unpack: def f(a,b,c): ... args=[1,2,3]; f(*args). kwargs={'a':1,'b':2,'c':3}; f(**kwargs). Combine: f(*args[:2], c=3)."},
+      {tag:"py",t:"Pass-through: def wrapper(*args,**kwargs): print('before'); result=func(*args,**kwargs); print('after'); return result"},
+      {tag:"sql",t:"ROLLUP: SELECT dept, job_title, SUM(salary) FROM employees GROUP BY ROLLUP(dept, job_title) — subtotals + grand total"},
+      {tag:"sql",t:"Window function preview: SELECT name, salary, AVG(salary) OVER (PARTITION BY dept) AS dept_avg FROM employees"},
+      {tag:"api",t:"Parametrize with JSON test data:",code:"# test_data/posts.json\n# [{\"title\":\"Post A\",\"body\":\"Body A\",\"userId\":1},\n#  {\"title\":\"Post B\",\"body\":\"Body B\",\"userId\":2}]\n\nimport json\n\nposts_data = json.load(open('test_data/posts.json'))\n\n@pytest.mark.parametrize('post_data', posts_data,\n    ids=[d['title'] for d in posts_data])\ndef test_create_post(base_url, post_data):\n    r = requests.post(f'{base_url}/posts', json=post_data)\n    assert r.status_code == 201"},
+      {tag:"do",t:"Expand test_data/posts.json to 5 entries. Parametrize create test. Run: pytest -v and see each case run separately with custom IDs."},
+    ]},
+    {day:35,label:"Week 5 Review — advanced patterns from memory",tasks:[
+      {tag:"rev",t:"Write from memory: a @retry(times=3) decorator, a @contextmanager timer, and a generator that yields API responses one at a time"},
+      {tag:"rev",t:"SQL from memory: transaction with rollback, INSERT with SELECT, UPDATE with JOIN, DELETE with subquery — 4 separate statements"},
+      {tag:"rev",t:"Write from memory: session-scoped auth fixture in conftest.py + 2 tests using it + parametrize from JSON data"},
+      {tag:"rev",t:"Full CRUD from memory: POST→verify 201, GET→verify fields, PUT→verify 200, DELETE→verify 200 — with auth header on all"},
+    ]},
+  ]},
+  {week:6,theme:"Pytest mastery · SQL views/indexes · Allure reports",quote:WEEK_QUOTES[5],
+   watch:[
+     {src:'u',label:'Udemy: REST API Testing Python+Pytest+Allure – remaining sections (Allure, conftest, fixtures deep)',url:'https://www.udemy.com/course-dashboard-redirect/?course_id='},
+     {src:'e',label:'Edureka: REST Assured Session 7 — BDD with Cucumber: Test Runner (@CucumberOptions), Step Definitions, auth token from login, POST with multipart/attachments, Scenario Outline + Examples, parallel execution',url:'https://learning.edureka.co/classroom/presentation/2741/29715/2006025?tab=CourseContent'},
+     {src:'u',label:'Udemy: SQL MySQL 365 Careers – views, indexes, optimization sections',url:'https://www.udemy.com/course-dashboard-redirect/?course_id=1405632'},
+     {src:'p',label:'Practice: Build your own conftest.py from scratch each day this week without referencing notes'},
+   ],days:[
+    {day:36,label:"Fixture scopes, CREATE VIEW, Allure title+step",tasks:[
+      {tag:"py",t:"Fixture scope function: runs per test (default). scope='class': once per class. scope='module': once per file. scope='session': once per run."},
+      {tag:"py",t:"Yield fixture = setup + teardown: @pytest.fixture def db(): conn=sqlite3.connect(':memory:'); yield conn; conn.close()"},
+      {tag:"sql",t:"CREATE VIEW: CREATE VIEW qa_team AS SELECT id, name, salary FROM employees WHERE dept='QA'. Query: SELECT * FROM qa_team WHERE salary > 50000"},
+      {tag:"sql",t:"CREATE VIEW for reporting: CREATE VIEW order_summary AS SELECT u.name, COUNT(o.id) AS orders, SUM(o.amount) AS total FROM users u LEFT JOIN orders o ON u.id=o.user_id GROUP BY u.id,u.name"},
+      {tag:"api",t:"Full Allure decoration:",code:"@allure.title('Create and verify a new post')\n@allure.description('POSTs a new post, verifies 201, confirms returned fields')\ndef test_create_post(base_url):\n    with allure.step('Prepare payload'):\n        payload={'title':'Allure Test','body':'Testing','userId':1}\n\n    with allure.step('Send POST request'):\n        r = requests.post(f'{base_url}/posts', json=payload)\n\n    with allure.step('Assert status 201'):\n        assert r.status_code == 201\n\n    with allure.step('Assert response fields'):\n        data = r.json()\n        assert 'id' in data\n        assert data['title'] == payload['title']"},
+      {tag:"do",t:"Run: pytest --alluredir=results. Then: allure serve results. Open browser. See all steps visible in report."},
+    ]},
+    {day:37,label:"conftest.py deep, view queries, Allure attach",tasks:[
+      {tag:"py",t:"conftest.py at 2 levels: /conftest.py (global) and /tests/api/conftest.py (local). Local fixtures override global. Test how scoping works."},
+      {tag:"py",t:"Fixture dependency: @pytest.fixture def client(base_url, auth_token): return APIClient(base_url, auth_token). One fixture using another."},
+      {tag:"sql",t:"Query a view: SELECT * FROM qa_team ORDER BY salary DESC. JOIN view with table: SELECT v.*, d.location FROM qa_team v JOIN offices d ON v.office_id=d.id"},
+      {tag:"sql",t:"Updatable view: UPDATE qa_team SET salary=60000 WHERE name='Alice'. Check if update reflects in base table."},
+      {tag:"api",t:"Attach request + response to Allure:",code:"def test_with_attachments(base_url):\n    payload = {'title':'Test','body':'Body','userId':1}\n\n    # Attach request\n    allure.attach(json.dumps(payload, indent=2),\n        name='Request Body',\n        attachment_type=allure.attachment_type.JSON)\n\n    r = requests.post(f'{base_url}/posts', json=payload)\n\n    # Attach response\n    allure.attach(json.dumps(r.json(), indent=2),\n        name='Response Body',\n        attachment_type=allure.attachment_type.JSON)"},
+      {tag:"do",t:"Add attachments (request body, response body, status code as text) to your 3 most important tests. Run report, verify attachments show."},
+    ]},
+    {day:38,label:"pytest.mark, CREATE INDEX, Allure generate+view",tasks:[
+      {tag:"py",t:"Custom marks: @pytest.mark.smoke for critical tests, @pytest.mark.regression for full suite. Register in pytest.ini. Run: pytest -m smoke"},
+      {tag:"py",t:"@pytest.mark.skip(reason='WIP'). @pytest.mark.xfail(reason='known bug'). @pytest.mark.skipif(condition, reason='skip if...')"},
+      {tag:"sql",t:"CREATE INDEX: CREATE INDEX idx_email ON users(email). Then: EXPLAIN SELECT * FROM users WHERE email='x@y.com' — see index used"},
+      {tag:"sql",t:"Composite index: CREATE INDEX idx_dept_salary ON employees(dept, salary). Useful when you filter by both. Write query that uses it."},
+      {tag:"api",t:"Complete test file structure:",code:"# conftest.py\n@pytest.fixture(scope='session') def base_url(): ...\n@pytest.fixture(scope='session') def auth_token(base_url): ...\n@pytest.fixture def client(base_url, auth_token): ...\n\n# test_posts.py\n@allure.title('Smoke: GET all posts')\n@pytest.mark.smoke\ndef test_get_all_posts(client): ...\n\n@allure.title('Regression: Create post')\n@pytest.mark.regression\ndef test_create_post(client): ..."},
+      {tag:"do",t:"Mark your tests: 2 as smoke, 4 as regression. Run: pytest -m smoke (see 2). Run: pytest -m regression (see 4). Run: pytest (see all 6)."},
+    ]},
+    {day:39,label:"Soft asserts, query optimization, full Allure suite",tasks:[
+      {tag:"py",t:"Soft assertions: install pytest-check. from pytest_check import check. check.equal(a,b) — test continues even if this fails."},
+      {tag:"py",t:"Soft assert all fields: check.is_in('id',data); check.is_in('title',data); check.is_in('body',data). All checked before failing."},
+      {tag:"sql",t:"EXPLAIN: EXPLAIN SELECT * FROM users WHERE email='test@test.com'. Look for 'index scan' vs 'seq scan'. Index = faster."},
+      {tag:"sql",t:"Optimize: avoid SELECT *, use indexed columns in WHERE, don't use functions on indexed columns (WHERE YEAR(date)=2023 → slow)"},
+      {tag:"api",t:"Test all fields with soft asserts:",code:"from pytest_check import check\n\ndef test_user_full_validation(client):\n    r = client.get('/users/1')\n    check.equal(r.status_code, 200)\n    data = r.json()\n    check.is_in('id', data)\n    check.is_in('name', data)\n    check.is_in('email', data)\n    check.is_in('phone', data)\n    check.is_in('website', data)\n    # All assertions checked even if some fail"},
+      {tag:"do",t:"Run full test suite. Generate Allure report. Check: all tests show, steps visible, attachments present, marks visible in report."},
+    ]},
+    {day:40,label:"parametrize with IDs, composite index, environment file",tasks:[
+      {tag:"py",t:"parametrize with IDs: @pytest.mark.parametrize('user_id,expected_name', [(1,'Leanne'),(2,'Ervin')], ids=['user-1','user-2'])"},
+      {tag:"py",t:"Indirect parametrize: use fixture that transforms params. Complex but useful for large test matrices."},
+      {tag:"sql",t:"Index decision: when to index? High cardinality columns (email, id). Frequently in WHERE/JOIN. Not: boolean, low-cardinality fields."},
+      {tag:"sql",t:"Write 5 queries and for each decide: does it need an index? Why? Which column to index?"},
+      {tag:"api",t:"Allure environment.properties:",code:"# Create file: allure-results/environment.properties\n# Contents:\n# Base.URL=https://jsonplaceholder.typicode.com\n# Environment=Testing\n# Python.Version=3.11\n# pytest.Version=7.4\n\n# Shows in Allure report sidebar under 'Environment'"},
+      {tag:"do",t:"Finalize your test suite: conftest.py, 6 tests (2 smoke + 4 regression), parametrized, soft asserts, Allure with env file. Run and verify report."},
+    ]},
+    {day:41,label:"Test ordering, index types, complete refactor",tasks:[
+      {tag:"py",t:"Test ordering: install pytest-ordering. @pytest.mark.run(order=1) runs first. @pytest.mark.run(order=-1) runs last."},
+      {tag:"py",t:"pytest-dependency: @pytest.mark.dependency(name='create'). @pytest.mark.dependency(depends=['create']). Skip if dependency failed."},
+      {tag:"sql",t:"Index types: B-tree (default, good for =, <, >, BETWEEN), Hash (only =), Full-text (LIKE, text search). Write example for each."},
+      {tag:"sql",t:"Review: write 3 CREATE VIEW, 3 CREATE INDEX, 5 queries using views — no notes, timed 20 min"},
+      {tag:"api",t:"Refactor your full test suite: order tests (create→read→update→delete), add dependency, all fixtures in conftest, Allure on all."},
+      {tag:"do",t:"Final suite: create_post (order=1) → get_post (depends=create, order=2) → update_post (depends=get, order=3) → delete_post (order=4). Run and verify order."},
+    ]},
+    {day:42,label:"Week 6 Review — full pytest + Allure from scratch",tasks:[
+      {tag:"rev",t:"Write from memory: conftest.py with 3 fixture scopes (session/module/function) + yield teardown. No notes. 10 min."},
+      {tag:"rev",t:"Write from memory: parametrize with custom IDs, @pytest.mark.smoke, @pytest.mark.skip, @pytest.mark.xfail — 4 test examples"},
+      {tag:"rev",t:"Write from memory: full Allure test with @allure.title, allure.step, allure.attach — one complete test, no notes"},
+      {tag:"rev",t:"SQL from memory: CREATE VIEW, CREATE INDEX, EXPLAIN, composite index, query optimization decision — 5 separate SQL statements"},
+    ]},
+  ]},
+  {week:7,theme:"Docker · Git workflow · CI/CD pipeline",quote:WEEK_QUOTES[6],
+   watch:[
+     {src:'e',label:'Edureka: DevOps Session 2 — Git: architecture (Working Dir/Staging/Local/Remote), init/add/commit/push/pull, branching/merging, merge conflicts, Git hooks, GitHub Actions, GitHub Copilot for code review',url:'https://learning.edureka.co/classroom/presentation/3057/32844/2527162?tab=CourseContent'},
+     {src:'e',label:'Edureka: DevOps Session 3 — Jenkins: architecture, Declarative vs Scripted Jenkinsfile, plugins, build triggers (webhook/poll SCM/schedule), credentials management, multi-branch pipelines, parallel execution',url:'https://learning.edureka.co/classroom/presentation/3057/32845/2528642?tab=CourseContent'},
+     {src:'e',label:'Edureka: DevOps Session 6 — Docker: architecture (Client/Host/Registry), Dockerfile (FROM/WORKDIR/COPY/RUN/EXPOSE/CMD), image layering + optimization, networking (Bridge/Host/Overlay), volumes, Docker Compose, Trivy image scanning',url:'https://learning.edureka.co/classroom/presentation/3057/32848/2537310?tab=CourseContent'},
+     {src:'e',label:'Edureka: DevOps Session 12 — End-to-End AI-Enhanced CI/CD Pipeline (capstone): ties Git → Jenkins → Docker → deploy into one pipeline',url:'https://learning.edureka.co/my-classroom/devops-certification-training/coursecontent?courseId=3057&fromMasterCourse=2750'},
+     {src:'p',label:'Practice: Dockerize your own test project. Write Dockerfile → docker build → docker run → tests pass inside container.'},
+   ],days:[
+    {day:43,label:"Docker concepts, Git branch strategy, Jenkins review",tasks:[
+      {tag:"do",t:"Install Docker Desktop. Run: docker run hello-world. See the output. Understand: image pulled → container created → ran → stopped."},
+      {tag:"do",t:"Docker concepts: Image = blueprint (read-only). Container = running image (read-write). Registry = Docker Hub (stores images). Dockerfile = recipe."},
+      {tag:"git",t:"Branching: git checkout -b feature/add-api-tests. Work on it. git checkout main. Feature is isolated. Never commit directly to main."},
+      {tag:"git",t:"Git flow: main (production) ← develop (integration) ← feature/xxx (your work). PR from feature → develop → main."},
+      {tag:"do",t:"Jenkins review: pipeline { agent any; stages { stage('Test') { steps { sh 'pytest tests/' } } } }. What is declarative pipeline?"},
+    ]},
+    {day:44,label:"docker run/ps, git commit/push, Jenkins params",tasks:[
+      {tag:"do",t:"docker pull python:3.11-slim. docker run -it python:3.11-slim bash — now you're inside the container! Type python3 and try code."},
+      {tag:"do",t:"docker ps — see running containers. docker ps -a — all containers (including stopped). docker stop ID. docker rm ID. docker images. docker rmi IMAGE."},
+      {tag:"git",t:"Full commit flow: git add tests/test_api.py; git commit -m 'add: API tests for /posts endpoint'; git push origin feature/api-tests"},
+      {tag:"git",t:"Commit message conventions: feat: new feature, fix: bug fix, test: tests, refactor: code change, docs: documentation. Write 5 example commit messages."},
+      {tag:"do",t:"Jenkins parameterized build:",code:"pipeline {\n  parameters {\n    string(name: 'BROWSER', defaultValue: 'chrome', description: 'Browser')\n    string(name: 'WORKERS', defaultValue: '4', description: 'Parallel workers')\n  }\n  stages {\n    stage('Test') {\n      steps {\n        sh 'pytest tests/ -n ${params.WORKERS}'\n      }\n    }\n  }\n}"},
+    ]},
+    {day:45,label:"Dockerfile, PR creation, GitHub webhook",tasks:[
+      {tag:"do",t:"Write Dockerfile:",code:"FROM python:3.11-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install -r requirements.txt --no-cache-dir\nCOPY . .\nCMD [\"pytest\", \"tests/\", \"-v\", \"--alluredir=allure-results\"]"},
+      {tag:"do",t:"Build: docker build -t my-api-tests . (the dot means 'use current directory'). See layers being built one by one."},
+      {tag:"git",t:"Create PR: push branch → GitHub → 'Compare & Pull Request' → Title: 'Add API tests for posts endpoint' → Description: what + why → Submit"},
+      {tag:"git",t:"Good PR description template: '## What: Added tests for /posts CRUD. ## Why: Covers the main user journey. ## How to test: Run pytest tests/test_posts.py'"},
+      {tag:"do",t:"GitHub webhook → Jenkins: Jenkins → Manage Jenkins → Configure → GitHub Server → Add webhook URL. Push code → Jenkins auto-triggers build."},
+    ]},
+    {day:46,label:"docker build/run/debug, PR review comments fix, HTML report",tasks:[
+      {tag:"do",t:"Run your test image: docker run my-api-tests. See tests running inside container. Debug: docker run -it --entrypoint bash my-api-tests then run pytest manually."},
+      {tag:"do",t:"Fix a broken container: check logs with docker logs CONTAINER_ID. Check if requirements installed: pip list inside container."},
+      {tag:"git",t:"PR review rejected — reviewer added comments. Your flow: READ all comments → make changes in same branch → git commit -m 'fix: address PR review comments' → git push → PR auto-updates. No new PR needed!"},
+      {tag:"git",t:"git diff main..feature/api-tests — see all changes between branches. git log --oneline -- see commit history. git blame file.py — who changed each line."},
+      {tag:"do",t:"Jenkins HTML report:",code:"post {\n  always {\n    publishHTML(target: [\n      allowMissing: false,\n      reportDir: 'reports',\n      reportFiles: 'report.html',\n      reportName: 'Test Report'\n    ])\n  }\n}"},
+    ]},
+    {day:47,label:"docker-compose, git stash/rebase, pipeline stages",tasks:[
+      {tag:"do",t:"docker-compose.yml:",code:"version: '3.8'\nservices:\n  tests:\n    build: .\n    volumes:\n      - ./allure-results:/app/allure-results\n    environment:\n      - BASE_URL=https://jsonplaceholder.typicode.com\n\n# Run all services: docker-compose up\n# Stop: docker-compose down"},
+      {tag:"do",t:"Run: docker-compose up. Tests execute inside container, allure-results saved to your local folder (via volume). Check results."},
+      {tag:"git",t:"git stash: save uncommitted work temporarily. git stash pop: restore it. Use when you need to switch branches mid-work."},
+      {tag:"git",t:"git rebase vs merge: rebase rewrites history = clean linear. merge preserves history = merge commit. In teams: always prefer merge for shared branches."},
+      {tag:"do",t:"Complete Jenkins pipeline:",code:"pipeline {\n  agent any\n  stages {\n    stage('Install') { steps { sh 'pip install -r requirements.txt' } }\n    stage('Test') { steps { sh 'pytest tests/ -v --alluredir=allure-results' } }\n    stage('Report') { steps { allure includeProperties: true, results: [[path: 'allure-results']] } }\n  }\n  post { always { junit 'reports/*.xml' } }\n}"},
+    ]},
+    {day:48,label:"Dockerize YOUR project, git advanced, full pipeline",tasks:[
+      {tag:"do",t:"Dockerize your API test project: Dockerfile, requirements.txt (requests, pytest, allure-pytest), docker build → docker run → tests pass in container."},
+      {tag:"do",t:"Volume mount: docker run -v $(pwd)/allure-results:/app/allure-results my-api-tests → results saved locally. Run allure serve."},
+      {tag:"git",t:"git cherry-pick COMMIT_HASH — take one specific commit from another branch. Useful for hotfixes: cherry-pick from feature to main."},
+      {tag:"git",t:"git tag v1.0.0 — mark a release. git push origin v1.0.0. git log --oneline --graph — visual branch history."},
+      {tag:"do",t:"Full pipeline simulation: run tests locally → commit → push → (imagine) Jenkins triggers → Docker builds → tests run → Allure report generated → PR created → merged to main."},
+    ]},
+    {day:49,label:"Week 7 Review — Docker + Git from memory",tasks:[
+      {tag:"rev",t:"Write Dockerfile for Python test project from memory. No notes. Include: FROM, WORKDIR, COPY, RUN pip, COPY ., CMD pytest."},
+      {tag:"rev",t:"Write docker-compose.yml with tests service + volume mount for allure-results — from memory"},
+      {tag:"rev",t:"Explain PR rejected → fix flow: write all git commands from memory. Explain why PR auto-updates without creating a new one."},
+      {tag:"rev",t:"Write Jenkins declarative pipeline from memory: 3 stages (Install, Test, Report) + parameterized BROWSER + publishHTML post step."},
+    ]},
+  ]},
+  {week:8,theme:"Full project · Mock interview · Ship it",quote:WEEK_QUOTES[7],
+   watch:[
+     {src:'p',label:'No new videos this week. Zero. Close all tabs. Open your editor and build.'},
+     {src:'p',label:'Your reference: re-read your own notes, rerun your own tests, review your own code. You are the source now.'},
+   ],days:[
+    {day:50,label:"Project structure + conftest skeleton + APIClient",tasks:[
+      {tag:"proj",t:"Create project structure: api_test_project/ with: conftest.py, tests/test_posts.py, tests/test_users.py, utils/api_client.py, utils/db_helper.py, test_data/, requirements.txt, Dockerfile, pytest.ini"},
+      {tag:"proj",t:"utils/api_client.py: APIClient class with __init__(base_url, token), get(), post(), put(), delete(), get_with_retry(retries=5), _log(method, url, status)"},
+      {tag:"proj",t:"conftest.py: @pytest.fixture(scope='session') base_url; auth_token; client(base_url,auth_token); db_connection (yields sqlite conn with teardown)"},
+      {tag:"proj",t:"pytest.ini: [pytest] markers = smoke: smoke tests regression: regression tests. addopts = --alluredir=allure-results -v"},
+    ]},
+    {day:51,label:"test_posts.py — full CRUD with DB verification",tasks:[
+      {tag:"proj",t:"test_create_post: POST payload → assert 201 → assert id in response → insert to SQLite → verify_in_db(name) → cleanup"},
+      {tag:"proj",t:"test_get_post: GET /posts/1 → assert 200 → validate all fields (id, title, body, userId) → assert types correct"},
+      {tag:"proj",t:"test_update_post: PUT /posts/1 with new title → assert 200 → assert title changed in response → UPDATE in SQLite → SELECT → assert DB matches"},
+      {tag:"proj",t:"test_delete_post: DELETE /posts/1 → assert 200 → SELECT from SQLite → assert row gone → GET again → assert 404 (if real API)"},
+    ]},
+    {day:52,label:"test_users.py + parametrize from JSON",tasks:[
+      {tag:"proj",t:"test_data/users.json: 3 user objects with name, email, username. Load in conftest: @pytest.fixture def user_data(): return json.load(open('test_data/users.json'))"},
+      {tag:"proj",t:"test_get_users.py: @pytest.mark.parametrize('user_id', [1,2,3,4,5], ids=['user-1'...]) def test_get_user(client, user_id): assert status 200, assert fields"},
+      {tag:"proj",t:"test_user_email_format: GET user → extract email → assert '@' in email → assert '.' in email.split('@')[1]"},
+      {tag:"proj",t:"@pytest.mark.smoke on: test_get_all_posts, test_get_user_1. @pytest.mark.regression on everything else. Run: pytest -m smoke (2 tests only)"},
+    ]},
+    {day:53,label:"Allure everywhere + soft asserts + edge cases",tasks:[
+      {tag:"proj",t:"Add @allure.title, @allure.description, allure.step, allure.attach to EVERY test. Request body attached. Response body attached."},
+      {tag:"proj",t:"Add soft assertions using pytest-check: test_get_user now checks all 10 fields with check.equal / check.is_in — none fail the whole test early"},
+      {tag:"proj",t:"Edge case tests: test_get_post_not_found (expect 404), test_create_post_empty_body, test_create_post_with_special_chars_in_title"},
+      {tag:"proj",t:"Run: pytest tests/ -v --alluredir=allure-results. Generate: allure serve allure-results. Verify: all steps, attachments, marks visible in report."},
+    ]},
+    {day:54,label:"Dockerfile + docker-compose + Jenkinsfile",tasks:[
+      {tag:"proj",t:"Dockerfile: FROM python:3.11-slim, WORKDIR /app, COPY requirements.txt ., RUN pip install, COPY . ., CMD [pytest, tests/, -v]. Build + run, confirm tests pass inside container."},
+      {tag:"proj",t:"docker-compose.yml: tests service with build:. and volume ./allure-results:/app/allure-results. Run docker-compose up — confirm results saved locally."},
+      {tag:"proj",t:"Jenkinsfile: pipeline, parameters (BROWSER string), stages: Install, Test (with params.BROWSER), Report (allure plugin). Post: publishHTML."},
+      {tag:"proj",t:"requirements.txt: requests, pytest, allure-pytest, pytest-check, pytest-ordering. Pin versions: requests==2.31.0. Generate: pip freeze > requirements.txt"},
+    ]},
+    {day:55,label:"Mock interview — write everything from memory, timed",tasks:[
+      {tag:"rev",t:"TIMED 8 MIN: Write call_with_retry(url, retries=5) returning True/False AND get_with_retry returning response. Both versions. Clock starts now."},
+      {tag:"rev",t:"TIMED 8 MIN: Write 8 XPath expressions — @attr exact, contains class, text exact, contains text, index [2], last(), nested, starts-with. Clock starts now."},
+      {tag:"rev",t:"TIMED 8 MIN: Write 5 SQL queries — INNER JOIN + GROUP BY, HAVING, subquery in WHERE, UPDATE with JOIN, DELETE with subquery. Clock starts now."},
+      {tag:"rev",t:"TIMED 8 MIN: Write conftest.py with session client fixture + one test using it with Allure + parametrize. From scratch, no copy-paste."},
+    ]},
+    {day:56,label:"Day 56 — COMPLETE 🚀 You are ready to apply",tasks:[
+      {tag:"rev",t:"Final check — can you build the full project from scratch in 2 hours? Start a timer and try. If yes: you are interview-ready."},
+      {tag:"rev",t:"Update resume v5: add SQL testing, deep API testing, retry patterns, XPath advanced, Docker hands-on, Pytest+Allure, DB verification"},
+      {tag:"rev",t:"Target list: Verisk (apply again — you're significantly stronger now), similar product mid-size companies, QA Engineer roles at tech companies"},
+      {tag:"rev",t:"🎉 56 days. Python ✅ SQL ✅ API ✅ XPath ✅ Docker ✅ CI/CD ✅ The gaps that cost you Verisk are gone. Now go ship it."},
+    ]},
+  ]},
+]},
+];
+
+const STORAGE='raghava_v2';
+let state=JSON.parse(localStorage.getItem(STORAGE)||'{}');
+const save=()=>localStorage.setItem(STORAGE,JSON.stringify(state));
+const tkey=(m,w,d,i)=>`m${m}w${w}d${d}t${i}`;
+const dkey=(m,w,d)=>`m${m}w${w}d${d}`;
+const isTDone=(m,w,d,i)=>!!state[tkey(m,w,d,i)];
+const isDDone=(m,w,d)=>!!state[dkey(m,w,d)];
+
+let openM=new Set([1,2]),openW=new Set(),openD=new Set();
+window.toggleM=m=>{openM.has(m)?openM.delete(m):openM.add(m);render()};
+window.toggleW=k=>{openW.has(k)?openW.delete(k):openW.add(k);render()};
+window.toggleD=k=>{openD.has(k)?openD.delete(k):openD.add(k);render()};
+const DAY_COMPLETE_QUOTES=[
+  "Day complete. That's one day Verisk can't say no to.",
+  "Another day done. Your future self is taking notes.",
+  "✓ Done. The next interviewer will feel this effort.",
+  "Day logged. The gap is closing. One session at a time.",
+  "Streak alive. Every consistent engineer started exactly here.",
+  "Today's work doesn't disappear. It compounds.",
+  "Marked done. The retry loop returned True today.",
+  "Complete. You showed up. That's 90% of it.",
+  "Day ✓. SQL + Python + API — all in one session. That's the muscle you're building.",
+  "Done. 56 days seemed long on Day 1. Now look at your streak.",
+];
+function showToast(msg){
+  let t=document.getElementById('completion-toast');
+  if(!t){t=document.createElement('div');t.id='completion-toast';
+    t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1e3a8a,#0e4a5e);border:1px solid #2563eb;color:#e9d5ff;padding:12px 22px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 24px rgba(124,58,237,.4);transition:opacity .4s;max-width:360px;text-align:center;line-height:1.5';
+    document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';},3200);
+}
+window.tickTask=(m,w,d,i,total)=>{
+  const k=tkey(m,w,d,i);state[k]=!state[k];
+  const allDone=Array.from({length:total},(_,x)=>state[tkey(m,w,d,x)]).every(Boolean);
+  if(allDone&&state[k]){state[dkey(m,w,d)]=true;showToast(DAY_COMPLETE_QUOTES[Math.floor(Math.random()*DAY_COMPLETE_QUOTES.length)]);}
+  save();render();
+};
+window.tickDay=(m,w,d,total)=>{
+  const k=dkey(m,w,d);const nv=!state[k];state[k]=nv;
+  if(nv){for(let i=0;i<total;i++)state[tkey(m,w,d,i)]=true;showToast(DAY_COMPLETE_QUOTES[Math.floor(Math.random()*DAY_COMPLETE_QUOTES.length)]);}
+  save();render();
+};
+
+function getXP(){let x=0;PLAN.forEach(m=>m.weeks.forEach(w=>w.days.forEach(d=>{d.tasks.forEach((_,i)=>{if(isTDone(m.month,w.week,d.day,i))x+=10;});if(isDDone(m.month,w.week,d.day))x+=25;})));return x;}
+function getLevel(xp){return LEVELS.filter(l=>xp>=l.min).slice(-1)[0]||LEVELS[0];}
+function getStreak(){let s=0;for(const m of PLAN)for(const w of m.weeks)for(const d of w.days){if(isDDone(m.month,w.week,d.day))s++;else return s;}return s;}
+function getStats(){let td=0,dd=0,tt=0,dt=0;PLAN.forEach(m=>m.weeks.forEach(w=>w.days.forEach(d=>{td++;if(isDDone(m.month,w.week,d.day))dd++;d.tasks.forEach((_,i)=>{tt++;if(isTDone(m.month,w.week,d.day,i))dt++;});})));return{td,dd,tt,dt};}
+function getCurrentDay(){for(const m of PLAN)for(const w of m.weeks)for(const d of w.days)if(!isDDone(m.month,w.week,d.day))return d;return null;}
+
+function autoOpen(){for(const m of PLAN){let allM=true;for(const w of m.weeks){let allW=true;for(const d of w.days){if(!isDDone(m.month,w.week,d.day)){openW.add(`m${m.month}w${w.week}`);openD.add(`m${m.month}w${w.week}d${d.day}`);allW=false;break;}}if(!allW){allM=false;break;}}if(!allM)break;}}
+
+function render(){
+  const xp=getXP();const lv=getLevel(xp);const streak=getStreak();const s=getStats();
+  const pct=s.tt?Math.round(s.dt/s.tt*100):0;
+  const lvPct=Math.round((xp-lv.min)/(lv.max-lv.min)*100);
+
+  document.getElementById('xp-val').textContent=xp+' XP';
+  document.getElementById('level-name').textContent=lv.name;
+  document.getElementById('level-next').textContent=lv.next==='Complete'?'Max Level!':'Next: '+lv.next+' @ '+lv.max+' XP';
+  document.getElementById('level-fill').style.width=Math.min(lvPct,100)+'%';
+  document.getElementById('s-days').textContent=`${s.dd}/${s.td}`;
+  document.getElementById('s-remain').textContent=`${s.td-s.dd} days remaining`;
+  const streakBonus=streak>=28?'3x XP':streak>=14?'2x XP':streak>=7?'1.5x XP':'';
+  document.getElementById('s-streak').innerHTML=`<span class="streak-fire">🔥</span> ${streak}${streakBonus?` <span class="streak-x">${streakBonus}</span>`:''}`;
+  document.getElementById('s-streak-msg').textContent=streak===0?'Start today!':streak<7?'Keep going!':streak<28?'🔥 XP bonus active!':'🔥🔥 Unstoppable!';
+  document.getElementById('s-tasks').textContent=pct+'%';
+  document.getElementById('s-tasks-b').textContent=`${s.dt} of ${s.tt} tasks`;
+
+  if(!state._start&&s.dd>0){state._start=new Date().toISOString().split('T')[0];save();}
+  if(state._start){
+    document.getElementById('s-started').textContent='Started '+fmtDate(state._start);
+    const e=new Date(state._start);e.setDate(e.getDate()+55);
+    document.getElementById('s-eta').textContent=fmtDate(e.toISOString().split('T')[0]);
+  }
+
+  const cur=getCurrentDay();
+  const banner=document.getElementById('today-banner');
+  if(cur){banner.style.display='flex';document.getElementById('today-text').innerHTML=`Today's target: <strong>Day ${cur.day} — ${cur.label}</strong>. Open it below and get started.`;}
+  else{banner.style.display='flex';document.getElementById('today-text').innerHTML='<strong>🎉 All 56 days complete! You are ready. Go apply.</strong>';}
+
+  document.getElementById('app').innerHTML=PLAN.map(m=>renderM(m)).join('');
+  if(typeof searchQ!=='undefined'&&searchQ)setTimeout(applySearch,0);
+}
+
+function fmtDate(iso){const[y,m,d]=iso.split('-');const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${mn[parseInt(m)-1]} ${parseInt(d)}, ${y}`;}
+
+function mProg(m){let d=0,t=0;m.weeks.forEach(w=>w.days.forEach(day=>{day.tasks.forEach((_,i)=>{t++;if(isTDone(m.month,w.week,day.day,i))d++;});}));return{d,t,pct:t?Math.round(d/t*100):0};}
+function wProg(m,w){let d=0,t=0;w.days.forEach(day=>{day.tasks.forEach((_,i)=>{t++;if(isTDone(m.month,w.week,day.day,i))d++;});});return{d,t};}
+function isWDone(m,w){return w.days.every(d=>isDDone(m.month,w.week,d.day));}
+function isMDone(m){return m.weeks.every(w=>isWDone(m,w));}
+
+function renderM(m){
+  const open=openM.has(m.month);const p=mProg(m);const done=isMDone(m);
+  return`<div class="month-wrap">
+    <div class="month-hdr" onclick="toggleM(${m.month})">
+      <div class="m-check${done?' done':''}"><span>${done?'✓':m.month}</span></div>
+      <div class="m-title">${m.title}</div>
+      <div class="m-prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:${p.pct}%"></div></div><div class="prog-pct">${p.pct}% · ${p.d}/${p.t} tasks</div></div>
+      <div class="chevron${open?' open':''}">▼</div>
+    </div>
+    ${open?`<div>${m.weeks.map(w=>renderW(m,w)).join('')}</div>`:''}
+  </div>`;
+}
+
+function renderWatch(w){
+  if(!w.watch||!w.watch.length) return '';
+  const srcLabel={e:'🎓 Edureka',u:'🎬 Udemy',p:'⌨️ Practice'};
+  const chips=w.watch.map(r=>{
+    const cls=`watch-chip chip-${r.src}`;
+    if(r.url&&r.url.length>5)
+      return `<a href="${r.url}" target="_blank" class="${cls}"><span class="chip-icon">${r.src==='e'?'🎓':r.src==='u'?'🎬':'⌨️'}</span>${r.label}</a>`;
+    return `<span class="${cls}"><span class="chip-icon">${r.src==='e'?'🎓':r.src==='u'?'🎬':'⌨️'}</span>${r.label}</span>`;
+  }).join('');
+  return `<div class="watch-bar"><span class="watch-label">📺 Watch</span>${chips}</div>`;
+}
+
+function renderW(m,w){
+  const k=`m${m.month}w${w.week}`;const open=openW.has(k);const done=isWDone(m,w);
+  const daysDone=w.days.filter(d=>isDDone(m.month,w.week,d.day)).length;
+  const p=wProg(m,w);
+  return`<div class="week-wrap">
+    <div class="week-hdr" onclick="toggleW('${k}')">
+      <div class="w-check${done?' done':''}"><span>${done?'✓':''}</span></div>
+      <div class="w-info"><div class="w-title">Week ${w.week}</div><div class="w-theme">${w.theme}</div></div>
+      <div class="w-days-count">${daysDone}/7 days · ${p.d}/${p.t} tasks</div>
+      <div class="w-chevron${open?' open':''}">▼</div>
+    </div>
+    ${open?`<div class="week-quote">"${w.quote}"</div>${renderWatch(w)}<div class="days-wrap">${w.days.map(d=>renderD(m,w,d)).join('')}</div>`:''}
+  </div>`;
+}
+
+function renderD(m,w,d){
+  const k=`m${m.month}w${w.week}d${d.day}`;const open=openD.has(k);
+  const done=isDDone(m.month,w.week,d.day);
+  const tasksDone=d.tasks.filter((_,i)=>isTDone(m.month,w.week,d.day,i)).length;
+  const cur=getCurrentDay();const isToday=cur&&cur.day===d.day;
+  const isReview=d.tasks.some(t=>t.tag==='rev');
+  let struggleBanner='';
+  if(isReview){
+    const flagged=getWeekStruggled(m,w);
+    if(flagged.length>0){
+      const tagMap={py:'Python',sql:'SQL',api:'API',do:'DO',dx:'XPath',git:'Git',rev:'Review',proj:'Project'};
+      const items=flagged.map(f=>`&nbsp;• <span style="color:var(--blue-light)">${tagMap[f.tag]||f.tag}:</span> ${f.task.replace(/</g,'&lt;')}…`).join('<br>');
+      struggleBanner=`<div class="struggle-banner"><strong>⚑ Flagged tasks from this week (${flagged.length}) — drill these:</strong>${items}</div>`;
+    }
+  }
+  return`<div class="day-card${done?' day-done':''}${isToday&&!done?' day-today today-glow':''}">
+    <div class="day-hdr" onclick="toggleD('${k}')">
+      <div class="day-num-badge${done?' day-done-badge':''}">Day ${d.day}</div>
+      <div class="day-chk${done?' done':''}" onclick="event.stopPropagation();tickDay(${m.month},${w.week},${d.day},${d.tasks.length})">${done?'✓':''}</div>
+      <div class="day-label">${d.label}</div>
+      <div class="day-task-count">${tasksDone}/${d.tasks.length}</div>
+      <div class="day-chv${open?' open':''}">▼</div>
+    </div>
+    <div class="day-body${open?' open':''}">
+      ${struggleBanner}${d.tasks.map((t,i)=>renderTask(m,w,d,t,i)).join('')}
+    </div>
+  </div>`;
+}
+
+function getPlatform(tag,week){
+  // Edureka: py weeks 1-4, sql weeks 1-5, early OOP
+  // Udemy: api always, py weeks 5+, sql weeks 5+, docker week 7
+  // Practice: do, git, dx, proj, rev always
+  if(['do','git','dx','proj','rev'].includes(tag)) return 'p';
+  if(tag==='api') return 'u';
+  if(tag==='py') return week<=4?'e':'u';
+  if(tag==='sql') return week<=4?'e':'u';
+  return 'p';
+}
+
+function renderTask(m,w,d,t,i){
+  const done=isTDone(m.month,w.week,d.day,i);
+  const struggled=isStruggled(m.month,w.week,d.day,i);
+  const tagLabel={py:'Python',sql:'SQL',api:'API',do:'DO',git:'Git',proj:'Project',rev:'Review',dx:'XPath'}[t.tag]||t.tag.toUpperCase();
+  const plat=getPlatform(t.tag,w.week);
+  const platLabel={e:'Edureka',u:'Udemy',p:'Practice'}[plat];
+  return`<div class="task-item${struggled?' struggled':''}">
+    <div class="t-chk${done?' done':''}" onclick="tickTask(${m.month},${w.week},${d.day},${i},${d.tasks.length})">${done?'✓':''}</div>
+    <button class="t-flag${struggled?' on':''}" onclick="event.stopPropagation();flagTask(${m.month},${w.week},${d.day},${i})" title="${struggled?'Remove flag':'Flag as struggled'}">${struggled?'🚩':'⚑'}</button>
+    <div class="t-tag tag-${t.tag}">${tagLabel}</div>
+    <div class="t-text${done?' done':''}">
+      ${t.t}<span class="plat plat-${plat}">${platLabel}</span>
+      ${t.code?`<code class="t-code">${t.code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code>`:''}
+    </div>
+  </div>`;
+}
+
+// ── STRUGGLE FLAG ──
+const skey=(m,w,d,i)=>`sf_${m}_${w}_${d}_${i}`;
+const isStruggled=(m,w,d,i)=>!!state[skey(m,w,d,i)];
+window.flagTask=(m,w,d,i)=>{const k=skey(m,w,d,i);state[k]=!state[k];save();render();};
+function getWeekStruggled(m,w){
+  const items=[];
+  w.days.forEach(day=>{day.tasks.forEach((t,i)=>{if(isStruggled(m.month,w.week,day.day,i))items.push({tag:t.tag,task:t.t.substring(0,72)});});});
+  return items;
+}
+
+autoOpen();
+render();
+
+// ── SEARCH ──
+let searchQ='';
+(function initSearch(){
+  const inp=document.getElementById('search-input');
+  const clr=document.getElementById('search-clear');
+  if(!inp)return;
+  inp.addEventListener('input',e=>{
+    searchQ=e.target.value.trim().toLowerCase();
+    clr.style.display=searchQ?'inline':'none';
+    applySearch();
+  });
+})();
+function clearSearch(){
+  const inp=document.getElementById('search-input');
+  if(inp)inp.value='';
+  searchQ='';
+  const clr=document.getElementById('search-clear');
+  if(clr)clr.style.display='none';
+  const cnt=document.getElementById('search-count');
+  if(cnt)cnt.textContent='';
+  document.querySelectorAll('.task-item').forEach(el=>el.classList.remove('smatch','shide'));
+  document.querySelectorAll('.day-card').forEach(el=>el.classList.remove('shide'));
+}
+function applySearch(){
+  const cnt=document.getElementById('search-count');
+  if(!searchQ){clearSearch();return;}
+  let matches=0;
+  document.querySelectorAll('.day-card').forEach(card=>{
+    let hit=0;
+    card.querySelectorAll('.task-item').forEach(item=>{
+      if(item.textContent.toLowerCase().includes(searchQ)){item.classList.add('smatch');item.classList.remove('shide');hit++;matches++;}
+      else{item.classList.remove('smatch');item.classList.add('shide');}
+    });
+    if(hit>0){
+      card.classList.remove('shide');
+      const body=card.querySelector('.day-body');if(body)body.classList.add('open');
+      const chv=card.querySelector('.day-chv');if(chv)chv.classList.add('open');
+    } else card.classList.add('shide');
+  });
+  if(cnt)cnt.textContent=matches?`${matches} match${matches>1?'es':''}`:' No matches';
+}
+
+// ── SESSION TIMER ──
+const TMR_BLOCKS=['Python','SQL','API','Combine+Practice'];
+let tmrSecs=7200,tmrRunning=false,tmrInt=null;
+function showTmr(){document.getElementById('tmr-widget').style.display='block';document.getElementById('tmr-fab').style.display='none';}
+function hideTmr(){document.getElementById('tmr-widget').style.display='none';document.getElementById('tmr-fab').style.display='block';}
+function toggleTmr(){
+  if(tmrRunning){clearInterval(tmrInt);tmrRunning=false;document.getElementById('tmr-go').textContent='▶ Resume';}
+  else{tmrInt=setInterval(tickTmr,1000);tmrRunning=true;document.getElementById('tmr-go').textContent='⏸ Pause';}
+}
+function resetTmr(){clearInterval(tmrInt);tmrRunning=false;tmrSecs=7200;document.getElementById('tmr-go').textContent='▶ Start';updateTmr();}
+function tickTmr(){
+  if(tmrSecs<=0){clearInterval(tmrInt);tmrRunning=false;showToast('🎉 2-hour session done! Great work today.');return;}
+  const elapsed=7200-tmrSecs;
+  if(elapsed>0&&elapsed%1800===0){
+    const blk=Math.min(Math.floor(elapsed/1800),3);
+    showToast(`⏱ Block ${blk} done — next: ${TMR_BLOCKS[blk]||'wrap up'} (30 min)`);
+  }
+  tmrSecs--;updateTmr();
+}
+function updateTmr(){
+  const h=Math.floor(tmrSecs/3600),m=Math.floor((tmrSecs%3600)/60),s=tmrSecs%60;
+  const d=document.getElementById('tmr-display');
+  if(!d)return;
+  d.textContent=`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  d.className='tmr-display'+(tmrSecs<600?' urg':tmrSecs<1800?' warn':'');
+  const blkEl=document.getElementById('tmr-blk');
+  if(blkEl){
+    if(tmrSecs<=0){blkEl.textContent='Session complete 🎉';}
+    else{const blk=Math.min(Math.floor((7200-tmrSecs)/1800),3);blkEl.textContent=`Block ${blk+1} of 4 · ${TMR_BLOCKS[blk]}`;}
+  }
+}
+
+// ── REFERENCE PANEL ──
+function toggleRef(){
+  document.getElementById('ref-panel').classList.toggle('open');
+  document.getElementById('ref-ov').classList.toggle('open');
+}
+function switchRef(tab){
+  document.querySelectorAll('.ref-ptab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ref-pane').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`[data-ref="${tab}"]`).classList.add('active');
+  document.getElementById(`ref-${tab}`).classList.add('active');
+}
+
+// ── MOCK INTERVIEW ──
+const IV_Q={
+  xpath:[
+    {q:'Write XPath to select all &lt;input&gt; elements where type is "text".',hint:'//input[@type="text"]'},
+    {q:'Write XPath using contains() to find a button whose class includes "submit".',hint:'//button[contains(@class,"submit")]'},
+    {q:'Write XPath using text() to find a link with exact text "Login".',hint:'//a[text()="Login"]'},
+    {q:'Write XPath to get the 3rd table row on the page.',hint:'(//tr)[3]'},
+    {q:'Write XPath using starts-with() to find any anchor tag whose href starts with "/api".',hint:'//a[starts-with(@href,"/api")]'},
+    {q:'Write XPath using last() to select the final button.',hint:'(//button)[last()]'},
+    {q:'Write XPath to find an input inside a form with id "login-form".',hint:'//form[@id="login-form"]//input'},
+    {q:'Write XPath with AND: input that is type="text" AND has name="username".',hint:'//input[@type="text" and @name="username"]'},
+  ],
+  sql:[
+    {q:'Write SQL to find all users who have placed more than 3 orders.',hint:'SELECT user_id, COUNT(*) as cnt FROM orders GROUP BY user_id HAVING COUNT(*) > 3'},
+    {q:'Write an INNER JOIN between users and orders on user_id.',hint:'SELECT u.name, o.id FROM users u INNER JOIN orders o ON u.id = o.user_id'},
+    {q:'Write a DELETE using a subquery to remove inactive users.',hint:"DELETE FROM users WHERE id IN (SELECT user_id FROM sessions WHERE last_seen < '2023-01-01')"},
+    {q:'What is the difference between WHERE and HAVING? Give an example of each.',hint:'WHERE filters rows before grouping. HAVING filters after GROUP BY. Example: WHERE salary > 50000 vs HAVING COUNT(*) > 3'},
+    {q:'Write SQL to get the 2nd highest salary from employees.',hint:'SELECT MAX(salary) FROM employees WHERE salary < (SELECT MAX(salary) FROM employees)'},
+    {q:'Write a BEGIN / SAVEPOINT / ROLLBACK TO transaction.',hint:'BEGIN; UPDATE t SET x=1; SAVEPOINT sp1; UPDATE t SET x=2; ROLLBACK TO sp1; COMMIT;'},
+  ],
+  python:[
+    {q:'Write call_with_retry(url, retries=5) that returns True if GET succeeds, False otherwise.',hint:'def call_with_retry(url, retries=5):\n  for _ in range(retries):\n    r = requests.get(url)\n    if r.status_code == 200: return True\n  return False'},
+    {q:'Write a @retry(times=3) decorator that retries on exception.',hint:'def retry(times=3):\n  def dec(f):\n    def w(*a,**k):\n      for _ in range(times):\n        try: return f(*a,**k)\n        except: pass\n    return w\n  return dec'},
+    {q:'What is the difference between *args and **kwargs? Show with a function definition.',hint:'*args = tuple of positional. **kwargs = dict of keyword.\ndef f(*args, **kwargs): print(args, kwargs)\nf(1, 2, key="val")'},
+    {q:'Write a list comprehension that flattens a 2D matrix.',hint:'matrix = [[1,2],[3,4],[5,6]]\nflat = [x for row in matrix for x in row]'},
+    {q:'Write a @contextmanager that prints elapsed time for any block.',hint:'from contextlib import contextmanager\nimport time\n@contextmanager\ndef timer():\n  t=time.time(); yield; print(f"{time.time()-t:.2f}s")'},
+    {q:'Explain session-scoped pytest fixture. Write one that returns an authenticated client.',hint:'@pytest.fixture(scope="session")\ndef client(base_url):\n  s=requests.Session()\n  r=s.post(f"{base_url}/auth",json={"u":"test","p":"test"})\n  s.headers["Authorization"]=f"Bearer {r.json()[\'token\']}"\n  return s'},
+  ],
+  api:[
+    {q:'What HTTP status codes should you assert for POST, GET, PUT, DELETE?',hint:'POST→201 Created, GET→200 OK, PUT→200 OK, DELETE→200 or 204 No Content. 404=not found, 400=bad request, 401=unauthorized'},
+    {q:'How do you test that a DELETE actually deleted the resource?',hint:'DELETE /resource/1 → assert 200. Then GET /resource/1 → assert 404. Or verify DB row is gone.'},
+    {q:'Write a parametrized test that creates posts for user IDs 1, 2, and 3.',hint:'@pytest.mark.parametrize("uid",[1,2,3])\ndef test_create(client,uid):\n  r=client.post("/posts",json={"title":"T","userId":uid})\n  assert r.status_code==201'},
+    {q:'What is the difference between Basic auth and Bearer token auth?',hint:'Basic: username:password base64-encoded in Authorization header. Bearer: access token (from login/OAuth) sent as "Authorization: Bearer <token>"'},
+    {q:'Write a pytest session fixture that logs in and sets the token on all subsequent requests.',hint:'@pytest.fixture(scope="session")\ndef auth_session(base_url):\n  s=requests.Session()\n  r=s.post(f"{base_url}/auth",json={"user":"x","pass":"y"})\n  s.headers["Authorization"]=f\'Bearer {r.json()["token"]}\'\n  return s'},
+  ],
+};
+let ivState={qs:[],idx:0,secs:120,tmr:null,running:false};
+function openIV(){
+  const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+  const cats=[
+    {...pick(IV_Q.xpath),cat:'xpath',tag:'XPath',cls:'tag-dx'},
+    {...pick(IV_Q.sql),cat:'sql',tag:'SQL',cls:'tag-sql'},
+    {...pick(IV_Q.python),cat:'python',tag:'Python',cls:'tag-py'},
+    {...pick(IV_Q.api),cat:'api',tag:'API',cls:'tag-api'},
+  ];
+  // 5th: any random
+  const rc=['xpath','sql','python','api'][Math.floor(Math.random()*4)];
+  const rq=pick(IV_Q[rc]);
+  const rcMeta={xpath:{tag:'XPath',cls:'tag-dx'},sql:{tag:'SQL',cls:'tag-sql'},python:{tag:'Python',cls:'tag-py'},api:{tag:'API',cls:'tag-api'}};
+  cats.push({...rq,cat:rc,...rcMeta[rc]});
+  ivState={qs:cats,idx:0,secs:120,tmr:null,running:false};
+  document.getElementById('iv-ov').classList.add('open');
+  renderIV();
+}
+function closeIV(){clearInterval(ivState.tmr);document.getElementById('iv-ov').classList.remove('open');}
+function startIVTmr(){
+  if(ivState.running)return;
+  ivState.running=true;
+  ivState.tmr=setInterval(()=>{
+    ivState.secs--;updateIVTmr();
+    if(ivState.secs<=0){clearInterval(ivState.tmr);ivState.running=false;}
+  },1000);
+}
+function updateIVTmr(){
+  const el=document.getElementById('iv-timer');if(!el)return;
+  const m=Math.floor(ivState.secs/60),s=ivState.secs%60;
+  el.textContent=`${m}:${String(s).padStart(2,'0')}`;
+  el.className='iv-timer'+(ivState.secs<=30?' r':ivState.secs<=60?' a':'');
+}
+function nextIV(){
+  clearInterval(ivState.tmr);ivState.running=false;ivState.idx++;ivState.secs=120;renderIV();
+}
+function renderIV(){
+  const modal=document.getElementById('iv-modal');
+  if(ivState.idx>=ivState.qs.length){
+    modal.innerHTML=`<div class="iv-result">
+      <h3>🎯 Session Complete!</h3>
+      <p>You worked through ${ivState.qs.length} questions across XPath, SQL, Python, and API.<br><br>
+      Answered them all confidently? You are interview-ready.<br>
+      Struggled on some? Flag those topics in the tracker and drill them before your next session.</p>
+      <br><div class="iv-btns" style="justify-content:center">
+        <button class="iv-btn p" onclick="openIV()">🔄 New Round</button>
+        <button class="iv-btn s" onclick="closeIV()">✕ Close</button>
+      </div></div>`;
+    return;
+  }
+  const q=ivState.qs[ivState.idx];
+  const dots=ivState.qs.map((_,i)=>`<div class="iv-dot${i<ivState.idx?' done':i===ivState.idx?' active':''}"></div>`).join('');
+  modal.innerHTML=`
+    <h2>🎯 Mock Interview</h2>
+    <div class="sub">Answer out loud first. Then reveal the hint. 2 minutes per question.</div>
+    <div class="iv-dots">${dots}</div>
+    <div class="iv-qnum">Question ${ivState.idx+1} of ${ivState.qs.length}</div>
+    <span class="iv-tag ${q.cls}">${q.tag}</span>
+    <div class="iv-q">${q.q}</div>
+    <button class="iv-show-hint" onclick="document.getElementById('ivh').classList.toggle('show');this.textContent=this.textContent==='👁 Show hint'?'🙈 Hide hint':'👁 Show hint'">👁 Show hint</button>
+    <div class="iv-hint" id="ivh">${q.hint.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}</div>
+    <div class="iv-timer" id="iv-timer">2:00</div>
+    <div class="iv-btns">
+      <button class="iv-btn p" onclick="nextIV()">${ivState.idx<ivState.qs.length-1?'Next →':'Finish Session'}</button>
+      <button class="iv-btn s" onclick="startIVTmr()">▶ Start Timer</button>
+      <button class="iv-btn s" onclick="closeIV()">✕ Exit</button>
+    </div>`;
+}
+</script>
+
+
+</body></html>
